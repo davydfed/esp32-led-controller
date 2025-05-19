@@ -19,7 +19,7 @@
   <script>
     async function update(led, state) {
       const body = { [led]: state };
-      const res = await fetch("/update", {
+      const res = await fetch("https://esp32-led-controller.onrender.com//update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
