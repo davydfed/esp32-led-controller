@@ -32,6 +32,8 @@
   <div class="switch"><label for="led1">LED 1</label><input type="checkbox" id="led1" /></div>
   <div class="switch"><label for="led2">LED 2</label><input type="checkbox" id="led2" /></div>
   <div class="switch"><label for="led3">LED 3</label><input type="checkbox" id="led3" /></div>
+
+  <div id="status-message" class="hidden"></div>
   <script>
     async function updateLED(led, state) {
       await fetch('/update', {
