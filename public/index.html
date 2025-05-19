@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ESP32 LED Control React</title>
+  <title>LED Controller</title>
   <style>
     body {
       font-family: sans-serif;
@@ -34,119 +34,92 @@
       border-radius: 6px;
       font-size: 16px;
       z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    #status-message.visible {
       opacity: 0.9;
-      visibility: visible;
+      transition: opacity 0.3s;
+      display: none;
     }
   </style>
 </head>
 <body>
+  <h1>LED Controller</h1>
   <div id="root"></div>
+
   <div id="status-message"></div>
 
-  <!-- React and ReactDOM from CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- React and ReactDOM via CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
   <script>
     const { useState, useEffect } = React;
 
-    function App() {
-      const [ledStates, setLedStates] = useState({ led1: false, led2: false, led3: false });
-      const [message, setMessage] = useState('');
-      const [messageVisible, setMessageVisible] = useState(false);
-      let msgTimeout = null;
+    function LEDControl() {
+      const [ledStates, setLedStates] = useState({});
 
-      // Функція для показу повідомлення
-      function showMessage(text, isError = false) {
-        setMessage(text);
-        const statusDiv = document.getElementById('status-message');
-        statusDiv.style.backgroundColor = isError ? 'red' : '#4CAF50';
-        setMessageVisible(true);
+      // Показ повідомлення знизу
+      function showMessage(message, isError = false) {
+        const msgBox = document.getElementById('status-message');
+        msgBox.textContent = message;
+        msgBox.style.backgroundColor = isError ? 'red' : '#4CAF50';
+        msgBox.style.display = 'block';
 
-        if (msgTimeout) clearTimeout(msgTimeout);
-        msgTimeout = setTimeout(() => {
-          setMessageVisible(false);
+        clearTimeout(window._msgTimeout);
+        window._msgTimeout = setTimeout(() => {
+          msgBox.style.display = 'none';
         }, 3000);
       }
 
-      // Завантаження стану з сервера
-      async function fetchLedStates() {
+      // Завантажуємо стан з сервера
+      async function fetchStates() {
         try {
-          const res = await fetch('commands.json', { cache: "no-store" });
-          if (!res.ok) throw new Error('Failed to fetch');
-          const data = await res.json();
-          setLedStates({
-            led1: data.led1 === 'on',
-            led2: data.led2 === 'on',
-            led3: data.led3 === 'on',
-          });
-        } catch (err) {
-          console.error(err);
-          showMessage('Помилка завантаження стану', true);
-        }
-      }
-
-      // Оновлення стану світлодіода на сервері
-      async function updateLed(led, state) {
-        try {
-          const res = await fetch('/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ led, state: state ? 'on' : 'off' }),
-          });
+          const res = await fetch(`/commands.json?t=${Date.now()}`);
           if (res.ok) {
-            showMessage(`Світлодіод ${led.replace('led', '')} ${state ? 'увімкнений' : 'вимкнений'}`);
-            // Локально оновлюємо стан (вже має бути оновлено, але на всяк випадок)
-            setLedStates(prev => ({ ...prev, [led]: state }));
+            const data = await res.json();
+            setLedStates(data);
           } else {
-            showMessage('Помилка оновлення', true);
+            showMessage('Помилка завантаження стану', true);
           }
-        } catch (err) {
-          console.error(err);
-          showMessage('Помилка зв’язку', true);
+        } catch (e) {
+          showMessage('Помилка з’єднання', true);
         }
-      }
-
-      // Обробник зміни чекбокса
-      function handleToggle(e) {
-        const led = e.target.id;
-        const newState = e.target.checked;
-        updateLed(led, newState);
       }
 
       useEffect(() => {
-        fetchLedStates();
-
-        const interval = setInterval(fetchLedStates, 5000);
-
+        fetchStates();
+        const interval = setInterval(fetchStates, 5000);
         return () => clearInterval(interval);
       }, []);
 
-      useEffect(() => {
-        const statusDiv = document.getElementById('status-message');
-        if (messageVisible) {
-          statusDiv.classList.add('visible');
-        } else {
-          statusDiv.classList.remove('visible');
+      // Відправляємо оновлення стану на сервер
+      async function updateLED(led, state) {
+        try {
+          const response = await fetch('/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ led, state }),
+          });
+
+          if (response.ok) {
+            setLedStates((prev) => ({ ...prev, [led]: state }));
+            showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
+          } else {
+            showMessage('Помилка при оновленні', true);
+          }
+        } catch (error) {
+          showMessage('Помилка з’єднання', true);
         }
-      }, [messageVisible]);
+      }
 
       return (
         React.createElement('div', null,
-          React.createElement('h1', null, 'LED Controller'),
           ['led1', 'led2', 'led3'].map(led =>
             React.createElement('div', { key: led, className: 'switch' },
-              React.createElement('label', { htmlFor: led }, `LED ${led.replace('led', '')}`),
+              React.createElement('label', { htmlFor: led }, led.toUpperCase()),
               React.createElement('input', {
                 type: 'checkbox',
                 id: led,
-                checked: ledStates[led],
-                onChange: handleToggle
+                checked: ledStates[led] === 'on',
+                onChange: e => updateLED(led, e.target.checked ? 'on' : 'off')
               })
             )
           )
@@ -154,7 +127,7 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(LEDControl));
   </script>
 </body>
 </html>
