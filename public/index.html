@@ -1,31 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <title>LED Control</title>
+  <title>ESP32 LED Control</title>
 </head>
 <body>
-  <h1>ESP32 LED Control</h1>
+  <h1>Керування LED</h1>
+  <button onclick="toggleLed('led1', 'on')">LED1 ON</button>
+  <button onclick="toggleLed('led1', 'off')">LED1 OFF</button><br/><br/>
+  <button onclick="toggleLed('led2', 'on')">LED2 ON</button>
+  <button onclick="toggleLed('led2', 'off')">LED2 OFF</button><br/><br/>
+  <button onclick="toggleLed('led3', 'on')">LED3 ON</button>
+  <button onclick="toggleLed('led3', 'off')">LED3 OFF</button>
 
-  <button onclick="update('led1', 'on')">LED 1 ON</button>
-  <button onclick="update('led1', 'off')">LED 1 OFF</button>
-  <br />
-  <button onclick="update('led2', 'on')">LED 2 ON</button>
-  <button onclick="update('led2', 'off')">LED 2 OFF</button>
-  <br />
-  <button onclick="update('led3', 'on')">LED 3 ON</button>
-  <button onclick="update('led3', 'off')">LED 3 OFF</button>
+  <p id="status"></p>
 
   <script>
-    async function update(led, state) {
-      const body = { [led]: state };
-      const res = await fetch("https://esp32-led-controller.onrender.com//update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
-      alert(JSON.stringify(data));
+    async function toggleLed(led, state) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Відправляємо...';
+
+      try {
+        const res = await fetch('/update', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ led, state })
+        });
+
+        if (res.ok) {
+          statusEl.textContent = `${led} встановлено в ${state}`;
+        } else {
+          statusEl.textContent = `Помилка: ${res.status}`;
+        }
+      } catch (err) {
+        statusEl.textContent = `Помилка: ${err.message}`;
+      }
     }
   </script>
 </body>
