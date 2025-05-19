@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LED Controller</title>
+  <title>ESP32 LED Control</title>
   <style>
     body {
       font-family: sans-serif;
@@ -41,22 +41,22 @@
   </style>
 </head>
 <body>
-  <h1>LED Controller</h1>
+  <h1>Керування LED</h1>
   <div id="root"></div>
 
   <div id="status-message"></div>
 
-  <!-- React and ReactDOM via CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- React -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 
   <script>
     const { useState, useEffect } = React;
 
     function LEDControl() {
-      const [ledStates, setLedStates] = useState({});
+      const [ledStates, setLedStates] = useState({ led1: "off", led2: "off", led3: "off" });
+      const [isUpdating, setIsUpdating] = useState(false);
 
-      // Показ повідомлення знизу
       function showMessage(message, isError = false) {
         const msgBox = document.getElementById('status-message');
         msgBox.textContent = message;
@@ -69,13 +69,18 @@
         }, 3000);
       }
 
-      // Завантажуємо стан з сервера
       async function fetchStates() {
         try {
           const res = await fetch(`/commands.json?t=${Date.now()}`);
           if (res.ok) {
             const data = await res.json();
-            setLedStates(data);
+            setLedStates(prev => {
+              // Якщо нові дані відрізняються — оновити стан
+              if (JSON.stringify(prev) !== JSON.stringify(data)) {
+                return data;
+              }
+              return prev;
+            });
           } else {
             showMessage('Помилка завантаження стану', true);
           }
@@ -90,8 +95,9 @@
         return () => clearInterval(interval);
       }, []);
 
-      // Відправляємо оновлення стану на сервер
       async function updateLED(led, state) {
+        if (isUpdating) return; // заблокувати одночасні запити
+        setIsUpdating(true);
         try {
           const response = await fetch('/update', {
             method: 'POST',
@@ -100,7 +106,7 @@
           });
 
           if (response.ok) {
-            setLedStates((prev) => ({ ...prev, [led]: state }));
+            setLedStates(prev => ({ ...prev, [led]: state }));
             showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
           } else {
             showMessage('Помилка при оновленні', true);
@@ -108,6 +114,7 @@
         } catch (error) {
           showMessage('Помилка з’єднання', true);
         }
+        setIsUpdating(false);
       }
 
       return (
