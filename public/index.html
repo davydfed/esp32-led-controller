@@ -1,40 +1,54 @@
+
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="manifest" href="manifest.json" />
   <title>ESP32 LED Control</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 1em auto;
+      width: 200px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input[type="checkbox"] {
+      transform: scale(1.5);
+    }
+  </style>
 </head>
 <body>
-  <h1>Керування LED</h1>
-  <button onclick="toggleLed('led1', 'on')">LED1 ON</button>
-  <button onclick="toggleLed('led1', 'off')">LED1 OFF</button><br/><br/>
-  <button onclick="toggleLed('led2', 'on')">LED2 ON</button>
-  <button onclick="toggleLed('led2', 'off')">LED2 OFF</button><br/><br/>
-  <button onclick="toggleLed('led3', 'on')">LED3 ON</button>
-  <button onclick="toggleLed('led3', 'off')">LED3 OFF</button>
-
-  <p id="status"></p>
-
+  <h1>LED Controller</h1>
+  <div class="switch"><label for="led1">LED 1</label><input type="checkbox" id="led1" /></div>
+  <div class="switch"><label for="led2">LED 2</label><input type="checkbox" id="led2" /></div>
+  <div class="switch"><label for="led3">LED 3</label><input type="checkbox" id="led3" /></div>
   <script>
-    async function toggleLed(led, state) {
-      const statusEl = document.getElementById('status');
-      statusEl.textContent = 'Відправляємо...';
+    async function updateLED(led, state) {
+      await fetch('/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ led, state })
+      });
+    }
 
-      try {
-        const res = await fetch('/update', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ led, state })
-        });
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      input.addEventListener('change', () => {
+        updateLED(input.id, input.checked ? "on" : "off");
+      });
+    });
 
-        if (res.ok) {
-          statusEl.textContent = `${led} встановлено в ${state}`;
-        } else {
-          statusEl.textContent = `Помилка: ${res.status}`;
-        }
-      } catch (err) {
-        statusEl.textContent = `Помилка: ${err.message}`;
-      }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
     }
   </script>
 </body>
