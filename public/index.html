@@ -2,9 +2,8 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="manifest" href="manifest.json" />
-  <title>ESP32 LED Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESP32 LED Control React</title>
   <style>
     body {
       font-family: sans-serif;
@@ -46,82 +45,116 @@
   </style>
 </head>
 <body>
-  <h1>LED Controller</h1>
-  <div class="switch"><label for="led1">LED 1</label><input type="checkbox" id="led1" /></div>
-  <div class="switch"><label for="led2">LED 2</label><input type="checkbox" id="led2" /></div>
-  <div class="switch"><label for="led3">LED 3</label><input type="checkbox" id="led3" /></div>
-
+  <div id="root"></div>
   <div id="status-message"></div>
 
+  <!-- React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
   <script>
-    async function updateLED(led, state) {
-      try {
-        const response = await fetch('/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ led, state })
-        });
+    const { useState, useEffect } = React;
 
-        if (response.ok) {
-          showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
-        } else {
-          showMessage('Помилка при оновленні', true);
+    function App() {
+      const [ledStates, setLedStates] = useState({ led1: false, led2: false, led3: false });
+      const [message, setMessage] = useState('');
+      const [messageVisible, setMessageVisible] = useState(false);
+      let msgTimeout = null;
+
+      // Функція для показу повідомлення
+      function showMessage(text, isError = false) {
+        setMessage(text);
+        const statusDiv = document.getElementById('status-message');
+        statusDiv.style.backgroundColor = isError ? 'red' : '#4CAF50';
+        setMessageVisible(true);
+
+        if (msgTimeout) clearTimeout(msgTimeout);
+        msgTimeout = setTimeout(() => {
+          setMessageVisible(false);
+        }, 3000);
+      }
+
+      // Завантаження стану з сервера
+      async function fetchLedStates() {
+        try {
+          const res = await fetch('commands.json', { cache: "no-store" });
+          if (!res.ok) throw new Error('Failed to fetch');
+          const data = await res.json();
+          setLedStates({
+            led1: data.led1 === 'on',
+            led2: data.led2 === 'on',
+            led3: data.led3 === 'on',
+          });
+        } catch (err) {
+          console.error(err);
+          showMessage('Помилка завантаження стану', true);
         }
-      } catch (error) {
-        console.error(error);
-        showMessage('Помилка з’єднання', true);
-      }
-    }
-
-    function showMessage(message, isError = false) {
-      const msgBox = document.getElementById('status-message');
-      msgBox.textContent = message;
-      msgBox.style.backgroundColor = isError ? 'red' : 'green';
-      msgBox.classList.add('visible');
-
-      if (window._msgTimeout) {
-        clearTimeout(window._msgTimeout);
       }
 
-      window._msgTimeout = setTimeout(() => {
-        msgBox.classList.remove('visible');
-      }, 3000);
-    }
-
-    async function syncCheckboxes() {
-      try {
-        const response = await fetch('commands.json', { cache: "no-store" });
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-
-        for (const led in data) {
-          const checkbox = document.getElementById(led);
-          if (checkbox) {
-            const shouldBeChecked = data[led] === "on";
-            if (checkbox.checked !== shouldBeChecked) {
-              checkbox.checked = shouldBeChecked;
-            }
+      // Оновлення стану світлодіода на сервері
+      async function updateLed(led, state) {
+        try {
+          const res = await fetch('/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ led, state: state ? 'on' : 'off' }),
+          });
+          if (res.ok) {
+            showMessage(`Світлодіод ${led.replace('led', '')} ${state ? 'увімкнений' : 'вимкнений'}`);
+            // Локально оновлюємо стан (вже має бути оновлено, але на всяк випадок)
+            setLedStates(prev => ({ ...prev, [led]: state }));
+          } else {
+            showMessage('Помилка оновлення', true);
           }
+        } catch (err) {
+          console.error(err);
+          showMessage('Помилка зв’язку', true);
         }
-      } catch (error) {
-        console.error('Помилка при синхронізації:', error);
       }
+
+      // Обробник зміни чекбокса
+      function handleToggle(e) {
+        const led = e.target.id;
+        const newState = e.target.checked;
+        updateLed(led, newState);
+      }
+
+      useEffect(() => {
+        fetchLedStates();
+
+        const interval = setInterval(fetchLedStates, 5000);
+
+        return () => clearInterval(interval);
+      }, []);
+
+      useEffect(() => {
+        const statusDiv = document.getElementById('status-message');
+        if (messageVisible) {
+          statusDiv.classList.add('visible');
+        } else {
+          statusDiv.classList.remove('visible');
+        }
+      }, [messageVisible]);
+
+      return (
+        React.createElement('div', null,
+          React.createElement('h1', null, 'LED Controller'),
+          ['led1', 'led2', 'led3'].map(led =>
+            React.createElement('div', { key: led, className: 'switch' },
+              React.createElement('label', { htmlFor: led }, `LED ${led.replace('led', '')}`),
+              React.createElement('input', {
+                type: 'checkbox',
+                id: led,
+                checked: ledStates[led],
+                onChange: handleToggle
+              })
+            )
+          )
+        )
+      );
     }
 
-    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-      input.addEventListener('change', () => {
-        updateLED(input.id, input.checked ? "on" : "off");
-      });
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      syncCheckboxes();
-      setInterval(syncCheckboxes, 5000);
-    });
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
 </body>
 </html>
