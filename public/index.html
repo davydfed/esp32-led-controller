@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -35,11 +35,13 @@
       border-radius: 6px;
       font-size: 16px;
       z-index: 1000;
-      opacity: 0.9;
-      transition: opacity 0.3s;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .hidden {
-      display: none;
+    #status-message.visible {
+      opacity: 0.9;
+      visibility: visible;
     }
   </style>
 </head>
@@ -49,7 +51,7 @@
   <div class="switch"><label for="led2">LED 2</label><input type="checkbox" id="led2" /></div>
   <div class="switch"><label for="led3">LED 3</label><input type="checkbox" id="led3" /></div>
 
-  <div id="status-message" class="hidden"></div>
+  <div id="status-message"></div>
 
   <script>
     async function updateLED(led, state) {
@@ -71,50 +73,55 @@
       }
     }
 
+    function showMessage(message, isError = false) {
+      const msgBox = document.getElementById('status-message');
+      msgBox.textContent = message;
+      msgBox.style.backgroundColor = isError ? 'red' : 'green';
+      msgBox.classList.add('visible');
+
+      if (window._msgTimeout) {
+        clearTimeout(window._msgTimeout);
+      }
+
+      window._msgTimeout = setTimeout(() => {
+        msgBox.classList.remove('visible');
+      }, 3000);
+    }
+
+    async function syncCheckboxes() {
+      try {
+        const response = await fetch('commands.json', { cache: "no-store" });
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+
+        for (const led in data) {
+          const checkbox = document.getElementById(led);
+          if (checkbox) {
+            const shouldBeChecked = data[led] === "on";
+            if (checkbox.checked !== shouldBeChecked) {
+              checkbox.checked = shouldBeChecked;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Помилка при синхронізації:', error);
+      }
+    }
+
     document.querySelectorAll('input[type="checkbox"]').forEach(input => {
       input.addEventListener('change', () => {
         updateLED(input.id, input.checked ? "on" : "off");
       });
     });
 
-    function showMessage(message, isError = false) {
-      const msgBox = document.getElementById('status-message');
-      msgBox.textContent = message;
-      msgBox.style.backgroundColor = isError ? 'red' : 'green';
-      msgBox.classList.remove('hidden');
-
-      clearTimeout(window._msgTimeout);
-      window._msgTimeout = setTimeout(() => {
-        msgBox.classList.add('hidden');
-      }, 3000);
-    }
+    window.addEventListener('DOMContentLoaded', () => {
+      syncCheckboxes();
+      setInterval(syncCheckboxes, 5000);
+    });
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
-
-    // Отримати стан з JSON і оновити чекбокси
-async function syncCheckboxes() {
-  try {
-    const response = await fetch('commands.json');
-    const data = await response.json();
-
-    for (const led in data) {
-      const checkbox = document.getElementById(led);
-      if (checkbox) {
-        checkbox.checked = data[led] === "on";
-      }
-    }
-  } catch (error) {
-    console.error('Помилка при синхронізації:', error);
-  }
-}
-
-// Синхронізуємо при завантаженні
-window.addEventListener('DOMContentLoaded', () => {
-  syncCheckboxes();
-});
-
   </script>
 </body>
 </html>
