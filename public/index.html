@@ -92,6 +92,29 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
+
+    // Отримати стан з JSON і оновити чекбокси
+async function syncCheckboxes() {
+  try {
+    const response = await fetch('commands.json');
+    const data = await response.json();
+
+    for (const led in data) {
+      const checkbox = document.getElementById(led);
+      if (checkbox) {
+        checkbox.checked = data[led] === "on";
+      }
+    }
+  } catch (error) {
+    console.error('Помилка при синхронізації:', error);
+  }
+}
+
+// Синхронізуємо при завантаженні
+window.addEventListener('DOMContentLoaded', () => {
+  syncCheckboxes();
+});
+
   </script>
 </body>
 </html>
