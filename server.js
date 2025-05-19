@@ -1,45 +1,46 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Дозволити обробку JSON-запитів
-app.use(bodyParser.json());
-
-// Слухати всі файли з папки public як статичні
+app.use(express.json());
 app.use(express.static('public'));
 
-// GET-запит для ESP32 — повертає JSON
-app.get('/commands.json', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'commands.json');
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('❌ Error reading commands.json:', err);
-      return res.status(500).send('Error reading JSON');
-    }
-    res.type('application/json').send(data);
-  });
-});
+const jsonFilePath = path.join(__dirname, 'public', 'commands.json');
 
-// POST-запит від кнопок — оновлює JSON
+// Читаємо JSON, якщо файл відсутній — створюємо з дефолтними значеннями
+function readCommands() {
+  try {
+    const data = fs.readFileSync(jsonFilePath, 'utf8');
+    return JSON.parse(data);
+  } catch {
+    return { led1: "off", led2: "off", led3: "off" };
+  }
+}
+
+// Записуємо JSON у файл
+function writeCommands(commands) {
+  fs.writeFileSync(jsonFilePath, JSON.stringify(commands, null, 2));
+}
+
 app.post('/update', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'commands.json');
-  const data = req.body;
+  const { led, state } = req.body;
 
-  fs.writeFile(filePath, JSON.stringify(data, null, 2), err => {
-    if (err) {
-      console.error('❌ Error writing commands.json:', err);
-      return res.status(500).send('Update failed');
-    }
-    console.log('✅ Updated commands.json:', data);
-    res.send('Update successful');
-  });
+  if (!['led1', 'led2', 'led3'].includes(led) || !['on', 'off'].includes(state)) {
+    return res.status(400).json({ error: 'Невірні параметри' });
+  }
+
+  const commands = readCommands();
+
+  commands[led] = state; // Оновлюємо потрібне поле
+
+  writeCommands(commands);
+
+  res.json({ success: true, commands });
 });
 
-// Запуск сервера
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(`Server started on port ${PORT}`);
 });
