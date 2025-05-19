@@ -54,23 +54,65 @@
 
   <div id="status-message" class="hidden"></div>
   <script>
-    async function updateLED(led, state) {
-      await fetch('/update', {
+   <script>
+  async function updateLED(led, state) {
+    try {
+      const response = await fetch('/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ led, state })
       });
-    }
 
-    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-      input.addEventListener('change', () => {
-        updateLED(input.id, input.checked ? "on" : "off");
-      });
+      if (response.ok) {
+        showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
+      } else {
+        showMessage('Помилка при оновленні', true);
+      }
+    } catch (error) {
+      console.error(error);
+      showMessage('Помилка з’єднання', true);
+    }
+  }
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+    input.addEventListener('change', () => {
+      updateLED(input.id, input.checked ? "on" : "off");
     });
+  });
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+  function showMessage(message, isError = false) {
+    let msgBox = document.getElementById('status-message');
+    if (!msgBox) {
+      msgBox = document.createElement('div');
+      msgBox.id = 'status-message';
+      msgBox.style.position = 'fixed';
+      msgBox.style.bottom = '20px';
+      msgBox.style.left = '50%';
+      msgBox.style.transform = 'translateX(-50%)';
+      msgBox.style.padding = '10px 20px';
+      msgBox.style.color = 'white';
+      msgBox.style.borderRadius = '8px';
+      msgBox.style.zIndex = '9999';
+      msgBox.style.fontFamily = 'sans-serif';
+      msgBox.style.fontSize = '16px';
+      document.body.appendChild(msgBox);
     }
+
+    msgBox.textContent = message;
+    msgBox.style.backgroundColor = isError ? 'red' : 'green';
+    msgBox.style.display = 'block';
+
+    clearTimeout(window._msgTimeout);
+    window._msgTimeout = setTimeout(() => {
+      msgBox.style.display = 'none';
+    }, 3000);
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+
   </script>
 </body>
 </html>
