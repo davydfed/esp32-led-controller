@@ -55,7 +55,7 @@
 
     function LEDControl() {
       const [ledStates, setLedStates] = useState({ led1: "off", led2: "off", led3: "off" });
-      const [isUpdating, setIsUpdating] = useState(false);
+      const [isLoading, setIsLoading] = useState(true);
 
       function showMessage(message, isError = false) {
         const msgBox = document.getElementById('status-message');
@@ -71,33 +71,25 @@
 
       async function fetchStates() {
         try {
-          const res = await fetch(`/commands.json?t=${Date.now()}`);
+          const res = await fetch(`/commands.json?t=${Date.now()}`); // уникаємо кешування
           if (res.ok) {
             const data = await res.json();
-            setLedStates(prev => {
-              // Якщо нові дані відрізняються — оновити стан
-              if (JSON.stringify(prev) !== JSON.stringify(data)) {
-                return data;
-              }
-              return prev;
-            });
+            setLedStates(data);
           } else {
             showMessage('Помилка завантаження стану', true);
           }
         } catch (e) {
           showMessage('Помилка з’єднання', true);
+        } finally {
+          setIsLoading(false);
         }
       }
 
       useEffect(() => {
         fetchStates();
-        const interval = setInterval(fetchStates, 5000);
-        return () => clearInterval(interval);
       }, []);
 
       async function updateLED(led, state) {
-        if (isUpdating) return; // заблокувати одночасні запити
-        setIsUpdating(true);
         try {
           const response = await fetch('/update', {
             method: 'POST',
@@ -114,7 +106,10 @@
         } catch (error) {
           showMessage('Помилка з’єднання', true);
         }
-        setIsUpdating(false);
+      }
+
+      if (isLoading) {
+        return React.createElement('p', null, 'Завантаження...');
       }
 
       return (
