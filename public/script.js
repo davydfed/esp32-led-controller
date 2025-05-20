@@ -84,12 +84,13 @@ function renderControls() {
   sliderLabel.htmlFor = 'led4-slider';
   sliderLabel.textContent = `Яскравість LED4: ${ledStates.led4}`;
 
-  const slider = document.createElement('input');
-  slider.type = 'range';
-  slider.id = 'led4';
-  slider.min = 0;
-  slider.max = 255;
-  slider.value = ledStates.led4;
+const slider = document.createElement('input');
+slider.type = 'range';
+slider.id = 'led4';
+slider.className = 'led-slider'; // ⬅️ Додали клас
+slider.min = 0;
+slider.max = 255;
+slider.value = ledStates.led4;
   slider.addEventListener('input', e => {
     sliderLabel.textContent = `Яскравість LED4: ${e.target.value}`;
   });
