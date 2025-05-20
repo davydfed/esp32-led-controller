@@ -86,7 +86,7 @@ function renderControls() {
 
   const slider = document.createElement('input');
   slider.type = 'range';
-  slider.id = 'led4-slider';
+  slider.id = 'led4';
   slider.min = 0;
   slider.max = 255;
   slider.value = ledStates.led4;
