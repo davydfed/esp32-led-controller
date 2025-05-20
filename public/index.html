@@ -3,34 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link rel="stylesheet" href="style.css">
   <title>ESP32 LED Control</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Бургер-меню -->
-<div class="burger-menu" id="burger">&#9776;</div>
-<div class="sidebar" id="sidebar">
-  <a href="#">Головна</a>
-  <a href="#faq">FAQ</a>
-</div>
+  <div class="overlay hidden" id="overlay"></div>
+
+  <div class="burger" id="burger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <nav class="sidebar hidden" id="sidebar">
+    <ul>
+      <li><a href="#">Головна</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </nav>
 
   <h1>Керування LED</h1>
   <div id="root"></div>
 
-  <div id="faq" style="margin-top: 100px;">
-  <h2>FAQ</h2>
-  <p>❓ <strong>Чому іноді не оновлюються стан перемикачів?</strong><br>Можливо, браузер кешує сторінку. Спробуйте оновити через Ctrl+F5.</p>
-  <p>📶 <strong>Чи працює це без інтернету?</strong><br>Так, якщо ESP32 і пристрій в одній Wi-Fi мережі.</p>
-</div>
-
-
+  <button id="refresh-btn" class="mobile-only">Оновити</button>
   <div id="status-message"></div>
 
-  <button id="refresh-btn" class="mobile-only">Оновити</button>
-
-  <!-- React -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <section id="faq" class="faq-section">
+    <h2>FAQ</h2>
+    <div class="faq-item">
+      <button class="faq-question">Як працює цей додаток?</button>
+      <div class="faq-answer">Він надсилає команди ESP32 для керування світлодіодами через Wi-Fi.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Як часто оновлюється стан?</button>
+      <div class="faq-answer">Стан оновлюється при кожній зміні або натисканні кнопки «Оновити».</div>
+    </div>
+  </section>
 
   <script src="script.js"></script>
 </body>

@@ -1,95 +1,109 @@
- const { useState, useEffect } = React;
+// React
+const { useState, useEffect } = React;
 
-    function LEDControl() {
-      const [ledStates, setLedStates] = useState({ led1: "off", led2: "off", led3: "off" });
-      const [isLoading, setIsLoading] = useState(true);
+function LEDControl() {
+  const [ledStates, setLedStates] = useState({ led1: "off", led2: "off", led3: "off" });
+  const [isLoading, setIsLoading] = useState(true);
 
-      function showMessage(message, isError = false) {
-        const msgBox = document.getElementById('status-message');
-        msgBox.textContent = message;
-        msgBox.style.backgroundColor = isError ? 'red' : '#4CAF50';
-        msgBox.style.display = 'block';
+  function showMessage(message, isError = false) {
+    const msgBox = document.getElementById('status-message');
+    msgBox.textContent = message;
+    msgBox.style.backgroundColor = isError ? 'red' : '#4CAF50';
+    msgBox.style.display = 'block';
+    clearTimeout(window._msgTimeout);
+    window._msgTimeout = setTimeout(() => {
+      msgBox.style.display = 'none';
+    }, 3000);
+  }
 
-        clearTimeout(window._msgTimeout);
-        window._msgTimeout = setTimeout(() => {
-          msgBox.style.display = 'none';
-        }, 3000);
+  async function fetchStates() {
+    try {
+      const res = await fetch('/commands.json?nocache=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        setLedStates(data);
+      } else {
+        showMessage('Помилка завантаження стану', true);
       }
-
-      async function fetchStates() {
-        try {
-          const res = await fetch('/commands.json?nocache=' + Date.now());
-          if (res.ok) {
-            const data = await res.json();
-            setLedStates(data);
-          } else {
-            showMessage('Помилка завантаження стану', true);
-          }
-        } catch (e) {
-          showMessage('Помилка з’єднання', true);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      useEffect(() => {
-        fetchStates();
-      }, []);
-
-      async function updateLED(led, state) {
-        try {
-          const response = await fetch('/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ led, state }),
-          });
-
-          if (response.ok) {
-            setLedStates(prev => ({ ...prev, [led]: state }));
-            showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
-          } else {
-            showMessage('Помилка при оновленні', true);
-          }
-        } catch (error) {
-          showMessage('Помилка з’єднання', true);
-        }
-      }
-
-      if (isLoading) {
-        return React.createElement('p', null, 'Завантаження...');
-      }
-
-      return (
-        React.createElement('div', null,
-          ['led1', 'led2', 'led3'].map(led =>
-            React.createElement('div', { key: led, className: 'switch' },
-              React.createElement('label', { htmlFor: led }, led.toUpperCase()),
-              React.createElement('input', {
-                type: 'checkbox',
-                id: led,
-                checked: ledStates[led] === 'on',
-                onChange: e => updateLED(led, e.target.checked ? 'on' : 'off')
-              })
-            )
-          )
-        )
-      );
+    } catch (e) {
+      showMessage('Помилка з’єднання', true);
+    } finally {
+      setIsLoading(false);
     }
+  }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(LEDControl));
+  useEffect(() => {
+    fetchStates();
+  }, []);
 
-    document.getElementById('refresh-btn').addEventListener('click', () => {
-      location.reload(true);
-    });
+  async function updateLED(led, state) {
+    try {
+      const response = await fetch('/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ led, state }),
+      });
 
-    // Бургер-меню
+      if (response.ok) {
+        setLedStates(prev => ({ ...prev, [led]: state }));
+        showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
+      } else {
+        showMessage('Помилка при оновленні', true);
+      }
+    } catch (error) {
+      showMessage('Помилка з’єднання', true);
+    }
+  }
+
+  if (isLoading) {
+    return React.createElement('p', null, 'Завантаження...');
+  }
+
+  return (
+    React.createElement('div', null,
+      ['led1', 'led2', 'led3'].map(led =>
+        React.createElement('div', { key: led, className: 'switch' },
+          React.createElement('label', { htmlFor: led }, led.toUpperCase()),
+          React.createElement('input', {
+            type: 'checkbox',
+            id: led,
+            checked: ledStates[led] === 'on',
+            onChange: e => updateLED(led, e.target.checked ? 'on' : 'off')
+          })
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(LEDControl));
+
+// Refresh button
+document.getElementById('refresh-btn').addEventListener('click', () => {
+  location.reload(true);
+});
+
+// Burger menu
 const burger = document.getElementById('burger');
 const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
 
 burger.addEventListener('click', () => {
-  if (sidebar.style.left === '0px') {
-    sidebar.style.left = '-220px';
-  } else {
-    sidebar.style.left = '0px';
-  }
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('hidden');
+  overlay.classList.toggle('hidden');
+});
+
+overlay.addEventListener('click', () => {
+  burger.classList.remove('active');
+  sidebar.classList.add('hidden');
+  overlay.classList.add('hidden');
+});
+
+// FAQ toggle
+document.querySelectorAll('.faq-question').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const answer = btn.nextElementSibling;
+    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+  });
 });

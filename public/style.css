@@ -1,94 +1,155 @@
- body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    .switch {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 1em auto;
-      width: 200px;
-    }
-    label {
-      font-weight: bold;
-    }
-    input[type="checkbox"] {
-      transform: scale(1.5);
-    }
-    #status-message {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 16px;
-      z-index: 1000;
-      opacity: 0.9;
-      transition: opacity 0.3s;
-      display: none;
-    }
+body {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
 
-    #refresh-btn {
-      position: fixed;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      z-index: 1000;
-      display: none;
-      user-select: none;
-      transition: background-color 0.3s;
-    }
-    #refresh-btn:hover {
-      background-color: #333;
-    }
-    @media (max-width: 768px) {
-      #refresh-btn.mobile-only {
-        display: block;
-      }
-    }
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1em auto;
+  width: 200px;
+}
 
-    .burger-menu {
+label {
+  font-weight: bold;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.5);
+}
+
+#status-message {
   position: fixed;
-  top: 10px;
-  left: 10px;
-  font-size: 30px;
-  cursor: pointer;
-  z-index: 1001;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  z-index: 1000;
+  opacity: 0.9;
+  display: none;
+}
+
+#refresh-btn {
+  margin-top: 30px;
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: white;
   color: black;
+  border: 2px solid black;
+  border-radius: 5px;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #refresh-btn.mobile-only {
+    display: block;
+  }
+}
+
+.burger {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 30px;
+  height: 22px;
+  z-index: 2001;
+  cursor: pointer;
+}
+
+.burger span {
+  display: block;
+  height: 4px;
+  background: black;
+  margin: 5px 0;
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+.burger.active span:nth-child(1) {
+  transform: rotate(45deg) translateY(8px);
+}
+
+.burger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.burger.active span:nth-child(3) {
+  transform: rotate(-45deg) translateY(-8px);
 }
 
 .sidebar {
   position: fixed;
   top: 0;
-  left: -220px;
-  width: 200px;
+  left: 0;
+  width: 220px;
   height: 100%;
-  background-color: white;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-  padding-top: 60px;
-  transition: left 0.3s ease;
-  z-index: 1000;
+  background: white;
+  padding: 40px 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  z-index: 2000;
+  transition: transform 0.3s;
 }
 
-.sidebar a {
-  display: block;
-  padding: 12px 20px;
-  color: black;
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 20px 0;
+}
+
+.sidebar ul li a {
   text-decoration: none;
-  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+  color: black;
 }
 
-.sidebar a:hover {
-  background-color: #f0f0f0;
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0,0,0,0.3);
+  z-index: 1500;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+/* FAQ */
+.faq-section {
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: left;
+}
+
+.faq-question {
+  width: 100%;
+  background: #eee;
+  border: none;
+  padding: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px 0;
+}
+
+.faq-answer {
+  display: none;
+  padding: 10px 15px;
+  background: #f9f9f9;
+  border-left: 3px solid #ccc;
 }
