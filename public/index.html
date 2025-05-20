@@ -42,12 +42,13 @@
     #refresh-btn {
   position: fixed;
   top: 10px;
-  right: 10px;
+  right: center;
   padding: 10px 15px;
   font-size: 16px;
-  background-color: none;
+  background-color: white;
   color: rgb(0, 0, 0);
-  border: 2px #000000ff;
+  border: 2px;
+  border-color: black;
   border-radius: 5px;
   z-index: 1000;
   display: none;
@@ -70,7 +71,7 @@
   <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-
+  <button id="refresh-btn" class="mobile-only">Оновити</button>
   <script>
     const { useState, useEffect } = React;
 
@@ -157,7 +158,5 @@
 });
 
   </script>
-
-<button id="refresh-btn" class="mobile-only">Оновити</button>
 </body>
 </html>
