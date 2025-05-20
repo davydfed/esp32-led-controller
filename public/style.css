@@ -27,6 +27,41 @@ input[type="checkbox"] {
   display: block;
 }
 
+/* Стильний повзунок */
+input[type="range"].led-slider {
+  -webkit-appearance: none;
+  width: 80%;
+  height: 8px;
+  background: #000;
+  border-radius: 5px;
+  outline: none;
+  margin: 1em auto;
+  display: block;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+input[type="range"].led-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+input[type="range"].led-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
 #status-message {
   position: fixed;
   bottom: 70px;
