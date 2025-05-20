@@ -1,0 +1,83 @@
+ const { useState, useEffect } = React;
+
+    function LEDControl() {
+      const [ledStates, setLedStates] = useState({ led1: "off", led2: "off", led3: "off" });
+      const [isLoading, setIsLoading] = useState(true);
+
+      function showMessage(message, isError = false) {
+        const msgBox = document.getElementById('status-message');
+        msgBox.textContent = message;
+        msgBox.style.backgroundColor = isError ? 'red' : '#4CAF50';
+        msgBox.style.display = 'block';
+
+        clearTimeout(window._msgTimeout);
+        window._msgTimeout = setTimeout(() => {
+          msgBox.style.display = 'none';
+        }, 3000);
+      }
+
+      async function fetchStates() {
+        try {
+          const res = await fetch('/commands.json?nocache=' + Date.now());
+          if (res.ok) {
+            const data = await res.json();
+            setLedStates(data);
+          } else {
+            showMessage('Помилка завантаження стану', true);
+          }
+        } catch (e) {
+          showMessage('Помилка з’єднання', true);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+
+      useEffect(() => {
+        fetchStates();
+      }, []);
+
+      async function updateLED(led, state) {
+        try {
+          const response = await fetch('/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ led, state }),
+          });
+
+          if (response.ok) {
+            setLedStates(prev => ({ ...prev, [led]: state }));
+            showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
+          } else {
+            showMessage('Помилка при оновленні', true);
+          }
+        } catch (error) {
+          showMessage('Помилка з’єднання', true);
+        }
+      }
+
+      if (isLoading) {
+        return React.createElement('p', null, 'Завантаження...');
+      }
+
+      return (
+        React.createElement('div', null,
+          ['led1', 'led2', 'led3'].map(led =>
+            React.createElement('div', { key: led, className: 'switch' },
+              React.createElement('label', { htmlFor: led }, led.toUpperCase()),
+              React.createElement('input', {
+                type: 'checkbox',
+                id: led,
+                checked: ledStates[led] === 'on',
+                onChange: e => updateLED(led, e.target.checked ? 'on' : 'off')
+              })
+            )
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(LEDControl));
+
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      location.reload(true);
+    });
