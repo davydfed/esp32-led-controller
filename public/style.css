@@ -21,6 +21,12 @@ input[type="checkbox"] {
   transform: scale(1.5);
 }
 
+#led4-slider {
+  width: 200px;
+  margin: 0.5em auto 1em;
+  display: block;
+}
+
 #status-message {
   position: fixed;
   bottom: 70px;

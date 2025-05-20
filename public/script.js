@@ -1,109 +1,108 @@
-// React
-const { useState, useEffect } = React;
+const root = document.getElementById('root');
+const statusMessage = document.getElementById('status-message');
+const refreshBtn = document.getElementById('refresh-btn');
 
-function LEDControl() {
-  const [ledStates, setLedStates] = useState({ led1: "off", led2: "off", led3: "off" });
-  const [isLoading, setIsLoading] = useState(true);
+let ledStates = { led1: "off", led2: "off", led3: "off", led4: 0 };
 
-  function showMessage(message, isError = false) {
-    const msgBox = document.getElementById('status-message');
-    msgBox.textContent = message;
-    msgBox.style.backgroundColor = isError ? 'red' : '#4CAF50';
-    msgBox.style.display = 'block';
-    clearTimeout(window._msgTimeout);
-    window._msgTimeout = setTimeout(() => {
-      msgBox.style.display = 'none';
-    }, 3000);
-  }
+function showMessage(message, isError = false) {
+  statusMessage.textContent = message;
+  statusMessage.style.backgroundColor = isError ? 'red' : '#4CAF50';
+  statusMessage.style.display = 'block';
 
-  async function fetchStates() {
-    try {
-      const res = await fetch('/commands.json?nocache=' + Date.now());
-      if (res.ok) {
-        const data = await res.json();
-        setLedStates(data);
-      } else {
-        showMessage('Помилка завантаження стану', true);
-      }
-    } catch (e) {
-      showMessage('Помилка з’єднання', true);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchStates();
-  }, []);
-
-  async function updateLED(led, state) {
-    try {
-      const response = await fetch('/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ led, state }),
-      });
-
-      if (response.ok) {
-        setLedStates(prev => ({ ...prev, [led]: state }));
-        showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
-      } else {
-        showMessage('Помилка при оновленні', true);
-      }
-    } catch (error) {
-      showMessage('Помилка з’єднання', true);
-    }
-  }
-
-  if (isLoading) {
-    return React.createElement('p', null, 'Завантаження...');
-  }
-
-  return (
-    React.createElement('div', null,
-      ['led1', 'led2', 'led3'].map(led =>
-        React.createElement('div', { key: led, className: 'switch' },
-          React.createElement('label', { htmlFor: led }, led.toUpperCase()),
-          React.createElement('input', {
-            type: 'checkbox',
-            id: led,
-            checked: ledStates[led] === 'on',
-            onChange: e => updateLED(led, e.target.checked ? 'on' : 'off')
-          })
-        )
-      )
-    )
-  );
+  clearTimeout(window._msgTimeout);
+  window._msgTimeout = setTimeout(() => {
+    statusMessage.style.display = 'none';
+  }, 3000);
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(LEDControl));
+async function fetchStates() {
+  try {
+    const res = await fetch('/commands.json?nocache=' + Date.now());
+    if (res.ok) {
+      const data = await res.json();
+      ledStates = data;
+      renderControls();
+    } else {
+      showMessage('Помилка завантаження стану', true);
+    }
+  } catch (e) {
+    showMessage('Помилка з’єднання', true);
+  }
+}
 
-// Refresh button
-document.getElementById('refresh-btn').addEventListener('click', () => {
+async function updateLED(led, state) {
+  try {
+    const response = await fetch('/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ led, state }),
+    });
+
+    if (response.ok) {
+      ledStates[led] = state;
+      renderControls();
+      if (led === 'led4') {
+        showMessage(`Яскравість LED4 встановлено на ${state}`);
+      } else {
+        showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
+      }
+    } else {
+      showMessage('Помилка при оновленні', true);
+    }
+  } catch (error) {
+    showMessage('Помилка з’єднання', true);
+  }
+}
+
+function renderControls() {
+  root.innerHTML = '';
+
+  // Керування трьома звичайними світлодіодами
+  ['led1', 'led2', 'led3'].forEach(led => {
+    const div = document.createElement('div');
+    div.className = 'switch';
+
+    const label = document.createElement('label');
+    label.htmlFor = led;
+    label.textContent = led.toUpperCase();
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = led;
+    checkbox.checked = ledStates[led] === 'on';
+    checkbox.addEventListener('change', e => {
+      updateLED(led, e.target.checked ? 'on' : 'off');
+    });
+
+    div.appendChild(label);
+    div.appendChild(checkbox);
+    root.appendChild(div);
+  });
+
+  // Керування яскравістю led4 (повзунок)
+  const sliderLabel = document.createElement('label');
+  sliderLabel.htmlFor = 'led4-slider';
+  sliderLabel.textContent = `Яскравість LED4: ${ledStates.led4}`;
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.id = 'led4-slider';
+  slider.min = 0;
+  slider.max = 255;
+  slider.value = ledStates.led4;
+  slider.addEventListener('input', e => {
+    sliderLabel.textContent = `Яскравість LED4: ${e.target.value}`;
+  });
+  slider.addEventListener('change', e => {
+    updateLED('led4', Number(e.target.value));
+  });
+
+  root.appendChild(sliderLabel);
+  root.appendChild(slider);
+}
+
+refreshBtn.addEventListener('click', () => {
   location.reload(true);
 });
 
-// Burger menu
-const burger = document.getElementById('burger');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-
-burger.addEventListener('click', () => {
-  burger.classList.toggle('active');
-  sidebar.classList.toggle('hidden');
-  overlay.classList.toggle('hidden');
-});
-
-overlay.addEventListener('click', () => {
-  burger.classList.remove('active');
-  sidebar.classList.add('hidden');
-  overlay.classList.add('hidden');
-});
-
-// FAQ toggle
-document.querySelectorAll('.faq-question').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const answer = btn.nextElementSibling;
-    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-  });
-});
+fetchStates();
