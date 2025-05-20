@@ -23,7 +23,7 @@ input[type="checkbox"] {
 
 #status-message {
   position: fixed;
-  bottom: 10px;
+  bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #4CAF50;
