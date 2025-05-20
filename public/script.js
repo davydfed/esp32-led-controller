@@ -81,3 +81,15 @@
     document.getElementById('refresh-btn').addEventListener('click', () => {
       location.reload(true);
     });
+
+    // Бургер-меню
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+
+burger.addEventListener('click', () => {
+  if (sidebar.style.left === '0px') {
+    sidebar.style.left = '-220px';
+  } else {
+    sidebar.style.left = '0px';
+  }
+});

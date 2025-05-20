@@ -7,8 +7,22 @@
   <title>ESP32 LED Control</title>
 </head>
 <body>
+  <!-- Бургер-меню -->
+<div class="burger-menu" id="burger">&#9776;</div>
+<div class="sidebar" id="sidebar">
+  <a href="#">Головна</a>
+  <a href="#faq">FAQ</a>
+</div>
+
   <h1>Керування LED</h1>
   <div id="root"></div>
+
+  <div id="faq" style="margin-top: 100px;">
+  <h2>FAQ</h2>
+  <p>❓ <strong>Чому іноді не оновлюються стан перемикачів?</strong><br>Можливо, браузер кешує сторінку. Спробуйте оновити через Ctrl+F5.</p>
+  <p>📶 <strong>Чи працює це без інтернету?</strong><br>Так, якщо ESP32 і пристрій в одній Wi-Fi мережі.</p>
+</div>
+
 
   <div id="status-message"></div>
 
