@@ -71,7 +71,7 @@
 
       async function fetchStates() {
         try {
-          const res = await fetch(`/commands.json?t=${Date.now()}`); // уникаємо кешування
+          const res = await fetch('/commands.json?nocache=' + Date.now()); // уникаємо кешування
           if (res.ok) {
             const data = await res.json();
             setLedStates(data);
