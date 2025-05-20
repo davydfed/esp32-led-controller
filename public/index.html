@@ -25,7 +25,7 @@
     }
     #status-message {
       position: fixed;
-      bottom: 10px;
+      bottom: 50px;
       left: 50%;
       transform: translateX(-50%);
       background-color: #4CAF50;
@@ -40,26 +40,30 @@
     }
 
     #refresh-btn {
-  position: fixed;
-  top: 10px;
-  right: center;
-  padding: 10px 15px;
-  font-size: 16px;
-  background-color: white;
-  color: rgb(0, 0, 0);
-  border: 2px;
-  border-color: black;
-  border-radius: 5px;
-  z-index: 1000;
-  display: none;
-}
-
-@media (max-width: 768px) {
-  #refresh-btn.mobile-only {
-    display: block;
-  }
-}
-
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 1000;
+      display: none;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+    #refresh-btn:hover {
+      background-color: #333;
+    }
+    @media (max-width: 768px) {
+      #refresh-btn.mobile-only {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
@@ -68,10 +72,12 @@
 
   <div id="status-message"></div>
 
+  <button id="refresh-btn" class="mobile-only">Оновити</button>
+
   <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <button id="refresh-btn" class="mobile-only">Оновити</button>
+
   <script>
     const { useState, useEffect } = React;
 
@@ -93,7 +99,7 @@
 
       async function fetchStates() {
         try {
-          const res = await fetch('/commands.json?nocache=' + Date.now()); // уникаємо кешування
+          const res = await fetch('/commands.json?nocache=' + Date.now());
           if (res.ok) {
             const data = await res.json();
             setLedStates(data);
@@ -154,9 +160,8 @@
     ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(LEDControl));
 
     document.getElementById('refresh-btn').addEventListener('click', () => {
-  location.reload(true); // true — для повного оновлення без кешу
-});
-
+      location.reload(true);
+    });
   </script>
 </body>
 </html>
