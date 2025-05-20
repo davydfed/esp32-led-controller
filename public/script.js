@@ -107,3 +107,19 @@ refreshBtn.addEventListener('click', () => {
 });
 
 fetchStates();
+
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+burger.addEventListener('click', () => {
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('hidden');
+  overlay.classList.toggle('hidden');
+});
+
+overlay.addEventListener('click', () => {
+  burger.classList.remove('active');
+  sidebar.classList.add('hidden');
+  overlay.classList.add('hidden');
+});
