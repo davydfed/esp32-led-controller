@@ -3,6 +3,7 @@
   "short_name": "LED Control",
   "start_url": ".",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "description": "Control LEDs connected to ESP32.",
   "icons": [
