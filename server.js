@@ -16,25 +16,18 @@ app.use(express.static('public'));
 
 const filePath = './public/commands.json';
 
-// Обробка POST-запитів на /update
+// Оновлення стану (лише властивості state)
 app.post('/update', async (req, res) => {
   const { led, state } = req.body;
 
   try {
-    // читаємо поточний JSON
     const data = await fs.readJson(filePath);
-
-    // перевіряємо, чи існує такий led
     if (!data[led]) {
       return res.status(404).json({ error: 'LED не знайдено' });
     }
-
-    // оновлюємо лише властивість state
+    // Оновлюємо лише властивість state
     data[led].state = state;
-
-    // запис нового JSON у файл
     await fs.writeJson(filePath, data, { spaces: 2 });
-
     res.sendStatus(200);
   } catch (err) {
     console.error('Помилка при оновленні JSON:', err);
@@ -42,29 +35,57 @@ app.post('/update', async (req, res) => {
   }
 });
 
-// Додатковий ендпоінт для додавання нового елементу
+// Додавання нового елементу
 app.post('/add-command', async (req, res) => {
-  const { key, newData } = req.body; // newData має містити: { type, state, pin }
+  const { key, newData } = req.body; // newData має містити { type, state, pin }
 
   try {
-    // Зчитаємо поточний JSON
     const data = await fs.readJson(filePath);
-
-    // Уникаємо перезапису існуючого елементу
     if (data[key]) {
       return res.status(400).json({ error: 'Команда з таким ключем вже існує' });
     }
-
-    // Додаємо новий елемент
     data[key] = newData;
-
-    // Записуємо оновлений JSON у файл
     await fs.writeJson(filePath, data, { spaces: 2 });
-
-    res.sendStatus(200); // Все ок
+    res.sendStatus(200);
   } catch (err) {
     console.error('Помилка при додаванні нового елементу:', err);
-    res.sendStatus(500); // Помилка сервера
+    res.sendStatus(500);
+  }
+});
+
+// Редагування існуючого елементу (оновлення всіх даних: type, state, pin)
+app.post('/edit-command', async (req, res) => {
+  const { key, newData } = req.body;
+  
+  try {
+    const data = await fs.readJson(filePath);
+    if (!data[key]) {
+      return res.status(404).json({ error: "LED не знайдено" });
+    }
+    data[key] = newData;
+    await fs.writeJson(filePath, data, { spaces: 2 });
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('Помилка при редагуванні елементу:', err);
+    res.sendStatus(500);
+  }
+});
+
+// Видалення елементу
+app.post('/delete-command', async (req, res) => {
+  const { key } = req.body;
+
+  try {
+    const data = await fs.readJson(filePath);
+    if (!data[key]) {
+      return res.status(404).json({ error: 'LED не знайдено' });
+    }
+    delete data[key];
+    await fs.writeJson(filePath, data, { spaces: 2 });
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('Помилка при видаленні елементу:', err);
+    res.sendStatus(500);
   }
 });
 
