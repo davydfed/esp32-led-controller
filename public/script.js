@@ -164,6 +164,41 @@ function openEditModal(key, config) {
   document.getElementById("edit-modal").style.display = "flex";
 }
 
+document.getElementById("edit-form").addEventListener("submit", async (e) => {
+  e.preventDefault(); // 🔹 Запобігає перезавантаженню сторінки
+
+  const key = document.getElementById("edit-key").value;
+  const type = document.getElementById("edit-type").value;
+  const pin = Number(document.getElementById("edit-pin").value);
+  let state;
+
+  if (type === "regular") {
+    state = document.getElementById("edit-state-regular").checked ? "on" : "off";
+  } else if (type === "pwa") {
+    state = Number(document.getElementById("edit-state-pwa").value);
+  }
+
+  const newData = { type, state, pin };
+
+  try {
+    const res = await fetch("/edit-command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, newData }),
+    });
+
+    if (res.ok) {
+      document.getElementById("edit-modal").style.display = "none";
+      loadCommands(); // 🔹 Оновлюємо головний екран
+    } else {
+      console.error("Помилка при редагуванні елемента");
+    }
+  } catch (e) {
+    console.error("Помилка з'єднання", e);
+  }
+});
+
+
 // Закриття модального вікна редагування
 document.getElementById("close-edit-modal").addEventListener("click", () => {
   document.getElementById("edit-modal").style.display = "none";
