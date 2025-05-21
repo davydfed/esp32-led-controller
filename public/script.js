@@ -133,6 +133,28 @@ async function deleteCommand(key) {
   }
 }
 
+// Функція для створення правильного елемента керування станом у модальному вікні редагування
+function updateEditStateInput(type, state) {
+  const container = document.getElementById("edit-state-container");
+  container.innerHTML = ""; // Очищаємо контейнер перед додаванням нового елемента
+
+  if (type === "regular") {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = "edit-state-regular";
+    checkbox.checked = state === "on";
+    container.appendChild(checkbox);
+  } else if (type === "pwa") {
+    const input = document.createElement("input");
+    input.type = "number";
+    input.id = "edit-state-pwa";
+    input.min = 0;
+    input.max = 255;
+    input.value = state;
+    container.appendChild(input);
+  }
+}
+
 // Відкриття модального вікна редагування
 function openEditModal(key, config) {
   document.getElementById("edit-key").value = key;
