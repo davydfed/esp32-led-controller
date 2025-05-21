@@ -59,7 +59,12 @@
           <div class="form-row" id="edit-state-container"></div>
           <div class="form-row">
             <label for="edit-pin">ESP32 ніжка (GPIO):</label>
-            <input type="number" id="edit-pin" required />
+            <select id="edit-pin">
+              <option value="2">GPIO2</option>
+              <option value="4">GPIO4</option>
+              <option value="5">GPIO5</option>
+              <option value="16">GPIO16</option>
+            </select>
           </div>
           <button type="submit">Зберегти зміни</button>
           <button type="button" id="close-edit-modal">Скасувати</button>
