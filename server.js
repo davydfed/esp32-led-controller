@@ -21,19 +21,24 @@ app.post('/update', async (req, res) => {
   const { led, state } = req.body;
 
   try {
-    // Зчитування поточного JSON
+    // читаємо поточний JSON
     const data = await fs.readJson(filePath);
 
-    // Оновлення стану заданого LED
-    data[led] = state;
+    // перевіряємо, чи існує такий led
+    if (!data[led]) {
+      return res.status(404).json({ error: 'LED не знайдено' });
+    }
 
-    // Запис оновленого JSON у файл
+    // оновлюємо лише властивість state
+    data[led].state = state;
+
+    // запис нового JSON у файл
     await fs.writeJson(filePath, data, { spaces: 2 });
 
-    res.sendStatus(200); // Все ок
+    res.sendStatus(200);
   } catch (err) {
     console.error('Помилка при оновленні JSON:', err);
-    res.sendStatus(500); // Помилка сервера
+    res.sendStatus(500);
   }
 });
 
