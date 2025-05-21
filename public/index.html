@@ -29,6 +29,22 @@
 
   <button id="refresh-btn" class="mobile-only">Оновити</button>
   <div id="status-message"></div>
+  <button id="add-btn" class="mobile-only">Додати</button>
+
+<div id="add-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Додати LED</h2>
+    <input type="text" id="led-name" placeholder="Ім'я лампи" />
+    <input type="text" id="led-ip" placeholder="IP ESP32" />
+    <select id="led-type">
+      <option value="basic">Звичайна</option>
+      <option value="dimmable">Регульована яскравість</option>
+    </select>
+    <button id="save-led">Зберегти</button>
+    <button id="cancel-led">Скасувати</button>
+  </div>
+</div>
+
 
   <!-- <section id="faq" class="faq-section">
     <h2>FAQ</h2>
