@@ -38,7 +38,6 @@ body {
 
 /* Кнопки */
 button {
-  position: fixed;
   background: #222;
   color: #fff;
   border: none;
@@ -46,10 +45,6 @@ button {
   border-radius: 6px;
   cursor: pointer;
   transition: 0.3s ease;
-}
-
-.deletebutton {
-  background-color: rgb(141, 33, 33);
 }
 
 button:hover {
@@ -246,30 +241,5 @@ input[type="checkbox"] {
   .modal button {
     width: 100%;
     margin: 5px 0;
-  }
-}
-
-.modal .button-container {
-  display: flex; /* Вирівнюємо кнопки в один ряд */
-  justify-content: space-between; /* Розподіляємо рівномірно */
-  gap: 10px; /* Відступ між кнопками */
-  margin-top: 20px; /* Додаємо простір зверху */
-}
-
-.modal button {
-  flex: 1; /* Кнопки займають рівне місце */
-  padding: 12px; /* Робимо трохи більшими */
-  font-size: 16px;
-}
-
-/* Адаптивність: кнопки стають на всю ширину в мобільній версії */
-@media (max-width: 768px) {
-  .modal .button-container {
-    flex-direction: column; /* У мобільній версії кнопки йдуть одна під одною */
-  }
-
-  .modal button {
-    width: 100%;
-    margin: 5px 0; /* Додаємо проміжок між кнопками */
   }
 }
