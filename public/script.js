@@ -135,6 +135,20 @@ async function deleteCommand(key) {
   }
 }
 
+// Відкриття модального вікна редагування
+function openEditModal(key, config) {
+  document.getElementById("edit-key").value = key;
+  document.getElementById("edit-type").value = config.type;
+  document.getElementById("edit-pin").value = config.pin;
+  updateEditStateInput(config.type, config.state);
+  document.getElementById("edit-modal").style.display = "flex";
+}
+
+// Закриття модального вікна редагування
+document.getElementById("close-edit-modal").addEventListener("click", () => {
+  document.getElementById("edit-modal").style.display = "none";
+});
+
 // Додавання нового LED
 document.getElementById("add-button").addEventListener("click", () => {
   document.getElementById("add-modal").style.display = "flex";
@@ -169,24 +183,6 @@ document.getElementById("add-form").addEventListener("submit", async (e) => {
 // Закриття модального вікна додавання
 document.getElementById("close-add-modal").addEventListener("click", () => {
   document.getElementById("add-modal").style.display = "none";
-});
-
-// Відкриття модального вікна редагування при натисканні "Редагувати"
-document.getElementById("edit-button").addEventListener("click", () => {
-  const key = document.getElementById("modal-title").textContent.toLowerCase(); // Отримуємо LED-ключ
-  fetch(`/commands.json?nocache=${Date.now()}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data[key]) {
-        openEditModal(key, data[key]); // Викликаємо функцію редагування
-      }
-    })
-    .catch(err => console.error("Помилка завантаження даних:", err));
-});
-
-// Закриття модального вікна редагування
-document.getElementById("close-edit-modal").addEventListener("click", () => {
-  document.getElementById("edit-modal").style.display = "none";
 });
 
 // Завантаження даних при запуску сторінки
