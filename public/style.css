@@ -1,14 +1,22 @@
-.led-item {
+ body {
+        font-family: Arial, sans-serif;
+      }
+      #led-container {
+        margin: 1rem;
+      }
+      .led-item {
         margin: 1rem 0;
-        border: 1px solid #ccc;
         padding: 0.5rem;
+        border: 1px solid #ccc;
       }
       .led-label {
+        font-weight: bold;
         margin-right: 1rem;
       }
       button {
         margin-left: 0.5rem;
       }
+      
       /* Стилі для модальних вікон */
       .modal {
         position: fixed;
@@ -16,8 +24,8 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0,0,0,0.5);
-        display: none;
+        background: rgba(0, 0, 0, 0.5);
+        display: none; /* Приховано за замовчуванням */
         align-items: center;
         justify-content: center;
       }
@@ -25,4 +33,9 @@
         background: #fff;
         padding: 1rem;
         border-radius: 4px;
+        min-width: 300px;
+      }
+      /* Додатковий стиль для inline‑блоків у формі */
+      .form-row {
+        margin-bottom: 0.5rem;
       }
