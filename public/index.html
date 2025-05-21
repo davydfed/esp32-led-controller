@@ -12,35 +12,60 @@
     <button id="add-button">Додати</button>
 
     <!-- Модальне вікно для додавання нового елементу -->
-    <div id="add-modal">
+    <div id="add-modal" class="modal">
       <div class="modal-content">
         <h3>Додати новий елемент</h3>
         <form id="add-form">
-          <div>
-            <label for="led-name">Назва:</label>
+          <div class="form-row">
+            <label for="led-name">Назва (ключ):</label>
             <input type="text" id="led-name" placeholder="led3" required />
           </div>
-          <div>
+          <div class="form-row">
             <label for="led-type">Тип:</label>
             <select id="led-type">
               <option value="regular">Regular (перемикач)</option>
               <option value="pwa">PWA (повзунок)</option>
             </select>
           </div>
-          <div>
-            <label for="led-type">Тип:</label>
-            <select id="led-type">
-              <option value="gpio1">GPIO1</option>
-              <option value="gpio2">GPIO2</option>
-            </select>
+          <div class="form-row">
+            <label for="led-pin">ESP32 ніжка (GPIO):</label>
+            <input type="number" id="led-pin" placeholder="2" required />
           </div>
           <button type="submit">Зберегти</button>
-          <button type="button" id="close-modal">Скасувати</button>
+          <button type="button" id="close-add-modal">Скасувати</button>
         </form>
       </div>
     </div>
 
-
+    <!-- Модальне вікно для редагування елементу -->
+    <div id="edit-modal" class="modal">
+      <div class="modal-content">
+        <h3>Редагувати елемент</h3>
+        <form id="edit-form">
+          <!-- Приховане поле для збереження ключа -->
+          <input type="hidden" id="edit-key" />
+          <div class="form-row">
+            <label for="edit-name">Назва (ключ):</label>
+            <input type="text" id="edit-name" disabled />
+          </div>
+          <div class="form-row">
+            <label for="edit-type">Тип:</label>
+            <select id="edit-type">
+              <option value="regular">Regular (перемикач)</option>
+              <option value="pwa">PWA (повзунок)</option>
+            </select>
+          </div>
+          <!-- Контейнер для динамічного введення даних стану -->
+          <div class="form-row" id="edit-state-container"></div>
+          <div class="form-row">
+            <label for="edit-pin">ESP32 ніжка (GPIO):</label>
+            <input type="number" id="edit-pin" required />
+          </div>
+          <button type="submit">Зберегти зміни</button>
+          <button type="button" id="close-edit-modal">Скасувати</button>
+        </form>
+      </div>
+    </div>
 
   <script src="script.js"></script>
 </body>
