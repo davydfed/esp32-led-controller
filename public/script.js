@@ -31,7 +31,7 @@ function renderCommands(commands) {
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = config.state === "on";
-      checkbox.disabled = true; // Забороняємо зміну на головному екрані
+      checkbox.disabled = true; // Відображення без редагування
       controlContainer.appendChild(checkbox);
     } else if (config.type === "pwa") {
       const slider = document.createElement("input");
@@ -39,14 +39,14 @@ function renderCommands(commands) {
       slider.min = 0;
       slider.max = 255;
       slider.value = config.state;
-      slider.disabled = true; // Забороняємо зміну на головному екрані
+      slider.disabled = true;
       controlContainer.appendChild(slider);
     }
 
     card.innerHTML = `<div class="led-title">${key.toUpperCase()}</div>`;
     card.appendChild(controlContainer);
 
-    // Натискання на картку відкриває модальне вікно
+    // Натискання відкриває модальне вікно
     card.addEventListener("click", () => openInfoModal(key, config));
 
     container.appendChild(card);
@@ -135,61 +135,31 @@ async function deleteCommand(key) {
   }
 }
 
-// Відкриття модального вікна редагування
-function openEditModal(key, config) {
-  document.getElementById("edit-key").value = key;
-  document.getElementById("edit-type").value = config.type;
-  document.getElementById("edit-pin").value = config.pin;
-  updateEditStateInput(config.type, config.state);
-  document.getElementById("edit-modal").style.display = "flex";
-}
+// Додавання нового LED
+document.getElementById("add-button").addEventListener("click", () => {
+  document.getElementById("add-modal").style.display = "flex";
+});
 
-function updateEditStateInput(type, state) {
-  const container = document.getElementById("edit-state-container");
-  container.innerHTML = "";
-  if (type === "regular") {
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = "edit-state-regular";
-    checkbox.checked = state === "on";
-    container.appendChild(checkbox);
-  } else if (type === "pwa") {
-    const input = document.createElement("input");
-    input.type = "number";
-    input.id = "edit-state-pwa";
-    input.min = 0;
-    input.max = 255;
-    input.value = state;
-    container.appendChild(input);
-  }
-}
-
-// Оновлення стану при редагуванні
-document.getElementById("edit-form").addEventListener("submit", async (e) => {
+document.getElementById("add-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const key = document.getElementById("edit-key").value;
-  const type = document.getElementById("edit-type").value;
-  const pin = Number(document.getElementById("edit-pin").value);
-  let state;
-  if (type === "regular") {
-    const checkbox = document.getElementById("edit-state-regular");
-    state = checkbox.checked ? "on" : "off";
-  } else if (type === "pwa") {
-    const input = document.getElementById("edit-state-pwa");
-    state = Number(input.value);
-  }
+  const key = document.getElementById("add-key").value.trim();
+  const type = document.getElementById("add-type").value;
+  const pin = Number(document.getElementById("add-pin").value.trim());
+  const state = type === "regular" ? "off" : 0;
+
   const newData = { type, state, pin };
+
   try {
-    const res = await fetch("/edit-command", {
+    const res = await fetch("/add-command", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key, newData }),
     });
     if (res.ok) {
-      document.getElementById("edit-modal").style.display = "none";
+      document.getElementById("add-modal").style.display = "none";
       loadCommands();
     } else {
-      console.error("Помилка при редагуванні елемента");
+      console.error("Помилка при додаванні нового елемента");
     }
   } catch (e) {
     console.error("Помилка з'єднання", e);
