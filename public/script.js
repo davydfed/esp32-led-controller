@@ -1,4 +1,4 @@
-// Завантаження даних з commands.json та рендеринг елементів
+// Функція для завантаження даних з commands.json та рендерингу елементів
 async function loadCommands() {
   try {
     const res = await fetch('/commands.json?nocache=' + Date.now());
@@ -15,20 +15,20 @@ async function loadCommands() {
 
 function renderCommands(commands) {
   const container = document.getElementById('led-container');
-  container.innerHTML = ''; // очищаємо контейнер
+  container.innerHTML = ''; // Очищення контейнеру
 
   Object.entries(commands).forEach(([key, config]) => {
     const div = document.createElement('div');
     div.className = 'led-item';
 
-    // Відображення назви з інформацією про GPIO
+    // Відображення назви та GPIO інформації
     const displayName = key.toUpperCase();
     const label = document.createElement('span');
     label.className = 'led-label';
     label.textContent = `${displayName} (GPIO${config.pin})`;
     div.appendChild(label);
 
-    // Створюємо елемент керування залежно від типу
+    // Створення елемента керування для state
     if (config.type === 'regular') {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
@@ -56,7 +56,7 @@ function renderCommands(commands) {
       div.appendChild(slider);
     }
 
-    // Додаємо кнопки "Редагувати" та "Видалити"
+    // Додаткові кнопки "Редагувати" та "Видалити"
     const editButton = document.createElement('button');
     editButton.textContent = 'Редагувати';
     editButton.addEventListener('click', () => openEditModal(key, config));
@@ -71,7 +71,7 @@ function renderCommands(commands) {
   });
 }
 
-// Оновлення лише поля state (з використанням endpoint /update)
+// Оновлення лише state (endpoint /update)
 async function updateCommand(key, newState) {
   try {
     const res = await fetch('/update', {
@@ -105,7 +105,7 @@ async function deleteCommand(key) {
   }
 }
 
-// Модальне вікно для редагування
+// Відкриття модального вікна для редагування
 function openEditModal(key, config) {
   document.getElementById('edit-key').value = key;
   document.getElementById('edit-name').value = key;
@@ -117,7 +117,7 @@ function openEditModal(key, config) {
 
 function updateEditStateInput(type, state) {
   const container = document.getElementById('edit-state-container');
-  container.innerHTML = ''; // очищаємо контейнер
+  container.innerHTML = ''; // Очищення контейнеру
   if (type === 'regular') {
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -139,7 +139,7 @@ function updateEditStateInput(type, state) {
   }
 }
 
-// При зміні типу у формі редагування оновлюємо поле для стану
+// При зміні типу у формі редагування – оновлюємо поле для стану
 document.getElementById('edit-type').addEventListener('change', (e) => {
   const newType = e.target.value;
   updateEditStateInput(newType, newType === 'regular' ? 'off' : 0);
@@ -190,7 +190,7 @@ document.getElementById('close-add-modal').addEventListener('click', () => {
   document.getElementById('add-modal').style.display = 'none';
 });
 
-// Обробка форми додавання нового елементу
+// Обробка форми додавання
 document.getElementById('add-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('led-name').value.trim();
