@@ -31,7 +31,7 @@ function renderCommands(commands) {
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = config.state === "on";
-      checkbox.disabled = true; // Відображення без редагування
+      checkbox.disabled = true;
       controlContainer.appendChild(checkbox);
     } else if (config.type === "pwa") {
       const slider = document.createElement("input");
@@ -46,7 +46,6 @@ function renderCommands(commands) {
     card.innerHTML = `<div class="led-title">${key.toUpperCase()}</div>`;
     card.appendChild(controlContainer);
 
-    // Натискання відкриває модальне вікно
     card.addEventListener("click", () => openInfoModal(key, config));
 
     container.appendChild(card);
@@ -59,7 +58,6 @@ function openInfoModal(key, config) {
   document.getElementById("modal-type").textContent = config.type;
   document.getElementById("modal-pin").textContent = "GPIO " + config.pin;
 
-  // Очищаємо контейнер стану
   const modalStateContainer = document.getElementById("modal-state");
   modalStateContainer.innerHTML = "";
 
@@ -107,7 +105,7 @@ async function updateCommand(key, newState) {
     });
     if (res.ok) {
       console.log(`Оновлено ${key}: ${newState}`);
-      loadCommands(); // Оновлюємо головний екран
+      loadCommands();
     } else {
       console.error("Помилка при оновленні");
     }
