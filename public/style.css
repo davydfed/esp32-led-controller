@@ -7,36 +7,40 @@ body {
   padding: 20px;
 }
 
-/* Контейнер зі списком LED */
+/* Контейнер LED-карток */
 #led-container {
   max-width: 800px;
   margin: 20px auto;
-  padding: 20px;
-  border-radius: 12px;
-  background: #f9f9f9;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Елемент LED */
-.led-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
-  transition: background 0.3s ease;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
-.led-item:hover {
+/* Стиль окремої LED-картки */
+.led-card {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  width: 260px;
+  cursor: pointer;
+  text-align: center;
+  transition: 0.3s ease;
+}
+.led-card:hover {
   background: #f1f1f1;
 }
-
-.led-label {
+.led-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.led-control {
+  margin-top: 10px;
 }
 
-/* Кнопки */
+/* Загальний стиль кнопок */
 button {
   background: #222;
   color: #fff;
@@ -44,90 +48,78 @@ button {
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
   transition: 0.3s ease;
+  margin-right: 8px;
 }
-
 button:hover {
   background: #000;
 }
-
-/* Повзунок (PWA) */
-input[type="range"] {
-  width: 150px;
-  accent-color: #222;
+.btn-danger {
+  background: #d9534f;
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #c9302c;
+}
+.btn-cancel {
+  background: #ccc;
+  color: #222;
+}
+.btn-cancel:hover {
+  background: #bbb;
 }
 
-/* Чекбокси */
-input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+/* Контейнер для розміщення кнопок */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Стилізація формових рядків */
+.form-row {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+.form-row label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+}
+.form-row input,
+.form-row select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border 0.2s ease-in-out;
+}
+.form-row input:focus,
+.form-row select:focus {
+  border-color: #222;
+}
+
+/* Стиль кнопки додавання LED */
+.add-button {
+  display: block;
+  background: #222;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s ease;
+  margin: 20px auto;
+}
+.add-button:hover {
+  background: #000;
 }
 
 /* Модальні вікна */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal .modal-content {
-  background: #fff;
-  padding: 24px;
-  border-radius: 8px;
-  min-width: 320px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-
-@media (max-width: 768px) {
-  body {
-    font-size: 16px;
-    padding: 10px;
-  }
-
-  #led-container {
-    width: 95%;
-    padding: 15px;
-    border-radius: 8px;
-  }
-
-  .led-item {
-    flex-direction: column;
-    padding: 20px;
-    border-bottom: 1px solid #ccc;
-  }
-
-  .led-label {
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-
-  button {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 8px;
-    margin-top: 8px;
-  }
-
-  input[type="range"] {
-    width: 90%;
-  }
-
-  .modal .modal-content {
-    width: 90%;
-    padding: 20px;
-  }
-}
-
-/* Загальний стиль для модальних вікон */
 .modal {
   position: fixed;
   top: 0;
@@ -140,76 +132,17 @@ input[type="checkbox"] {
   justify-content: center;
   animation: fadeIn 0.3s ease-in-out;
 }
-
-/* Контейнер вмісту модального вікна */
 .modal .modal-content {
   background: #fff;
   padding: 24px;
   border-radius: 8px;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
   min-width: 320px;
   max-width: 500px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
 }
-
-/* Сучасна типографіка для заголовків в модальних вікнах */
 .modal h3 {
-  margin-top: 0;
-  font-size: 24px;
-  color: #222;
-}
-
-/* Стилізація для рядків форми в модальному вікні */
-.modal .form-row {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal .form-row label {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.modal .form-row input,
-.modal .form-row select {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-  transition: border 0.2s ease-in-out;
-}
-
-.modal .form-row input:focus,
-.modal .form-row select:focus {
-  border-color: #222;
-}
-
-/* Кнопки в модальних вікнах */
-.modal button {
-  background: #222;
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s ease;
-  margin-right: 10px;
-}
-
-.modal button:hover {
-  background: #000;
-}
-
-/* При необхідності - кнопка скасування */
-.modal .btn-cancel {
-  background: #ccc;
-  color: #222;
-}
-
-.modal .btn-cancel:hover {
-  background: #bbb;
+  font-size: 22px;
+  margin-bottom: 10px;
 }
 
 /* Анімація для плавного появи модальних вікон */
@@ -224,21 +157,26 @@ input[type="checkbox"] {
 
 /* Адаптивність для мобільних пристроїв */
 @media (max-width: 768px) {
+  #led-container {
+    width: 95%;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .led-card {
+    width: 100%;
+  }
+
   .modal .modal-content {
     width: 90%;
-    padding: 20px;
   }
 
-  .modal h3 {
-    font-size: 20px;
+  .button-container {
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .modal .form-row input, 
-  .modal .form-row select {
-    font-size: 14px;
-  }
-
-  .modal button {
+  button {
     width: 100%;
     margin: 5px 0;
   }
