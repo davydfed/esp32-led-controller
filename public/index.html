@@ -6,17 +6,14 @@
   <title>ESP32 LED Control</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="/manifest.json">
-
 </head>
 <body>
   <div class="overlay hidden" id="overlay"></div>
-
   <div class="burger" id="burger">
     <span></span>
     <span></span>
     <span></span>
   </div>
-
   <nav class="sidebar hidden" id="sidebar">
     <ul>
       <li><a href="#">Головна</a></li>
@@ -24,26 +21,10 @@
     </ul>
   </nav>
 
-  <h1>Керування LED</h1>
-  <div id="root"></div>
 
   <button id="refresh-btn" class="mobile-only">Оновити</button>
   <div id="status-message"></div>
-  <button id="add-btn" class="mobile-only">Додати</button>
 
-<div id="add-modal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Додати LED</h2>
-    <input type="text" id="led-name" placeholder="Ім'я лампи" />
-    <input type="text" id="led-ip" placeholder="IP ESP32" />
-    <select id="led-type">
-      <option value="basic">Звичайна</option>
-      <option value="dimmable">Регульована яскравість</option>
-    </select>
-    <button id="save-led">Зберегти</button>
-    <button id="cancel-led">Скасувати</button>
-  </div>
-</div>
 
 
   <!-- <section id="faq" class="faq-section">
@@ -58,6 +39,12 @@
     </div>
   </section> -->
 
+   <h1>Керування LED</h1>
+  <div id="root"></div>
+  <div class="add-led-section">
+    <button id="add-led-btn">Додати світлодіод</button>
+    <button id="save-json-btn">Зберегти конфігурацію</button>
+  </div>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="script.js"></script>
