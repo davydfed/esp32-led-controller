@@ -164,6 +164,19 @@ function openEditModal(key, config) {
   document.getElementById("edit-modal").style.display = "flex";
 }
 
+// 🔹 Додаємо обробник зміни типу **перед submit обробником**
+document.getElementById("edit-type").addEventListener("change", (e) => {
+  const newType = e.target.value;
+  
+  // Запобігаємо помилкам: перевіряємо та оновлюємо поле вводу стану
+  if (newType === "regular") {
+    updateEditStateInput(newType, "off");
+  } else if (newType === "pwa") {
+    updateEditStateInput(newType, 0);
+  }
+});
+
+
 document.getElementById("edit-form").addEventListener("submit", async (e) => {
   e.preventDefault(); // 🔹 Запобігає перезавантаженню сторінки
 
