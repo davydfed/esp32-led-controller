@@ -221,3 +221,29 @@ input[type="range"].led-slider::-moz-range-thumb {
     display: none !important;
   }
 }
+
+
+/* Стилі для основних елементів */
+      .led-item {
+        margin: 1rem 0;
+      }
+      .led-label {
+        margin-right: 1rem;
+      }
+      /* Стилі для модального вікна */
+      #add-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      #add-modal .modal-content {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 4px;
+      }

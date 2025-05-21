@@ -1,174 +1,135 @@
-const root = document.getElementById('root');
-const statusMessage = document.getElementById('status-message');
-const refreshBtn = document.getElementById('refresh-btn');
-const addLedBtn = document.getElementById('add-led-btn');
-const saveConfigBtn = document.getElementById('save-config-btn');
-
-const burger = document.getElementById('burger');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-
-let ledStates = {};
-let ledConfig = [];
-
-function showMessage(message, isError = false) {
-  statusMessage.textContent = message;
-  statusMessage.style.backgroundColor = isError ? 'red' : '#4CAF50';
-  statusMessage.style.display = 'block';
-  clearTimeout(window._msgTimeout);
-  window._msgTimeout = setTimeout(() => {
-    statusMessage.style.display = 'none';
-  }, 3000);
-}
-
-async function fetchStates() {
+// Завантаження даних із commands.json та рендеринг елементів
+async function loadCommands() {
   try {
     const res = await fetch('/commands.json?nocache=' + Date.now());
     if (res.ok) {
+      // Припустимо, що JSON має формат: { "led1": "regular, off, 2", ... }
       const data = await res.json();
-      ledStates = data;
-      ledConfig = Object.entries(data).map(([key, val], idx) => ({
-        name: key,
-        pin: typeof val === 'string' ? 2 + idx : 5 + idx,
-        type: typeof val === 'number' ? 'pwm' : 'onoff',
-      }));
-      renderControls();
+      renderCommands(data);
     } else {
-      showMessage('Помилка завантаження стану', true);
+      console.error('Помилка завантаження даних');
     }
   } catch (e) {
-    showMessage('Помилка з’єднання', true);
+    console.error('Помилка з’єднання', e);
   }
 }
 
-async function updateLED(led, state) {
-  try {
-    const response = await fetch('/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ led, state }),
-    });
+function renderCommands(commands) {
+  const container = document.getElementById('led-container');
+  container.innerHTML = ''; // Очищення контейнеру
 
-    if (response.ok) {
-      ledStates[led] = state;
-      showMessage(`Оновлено ${led}: ${state}`);
-    } else {
-      showMessage('Помилка при оновленні', true);
-    }
-  } catch {
-    showMessage('Помилка з’єднання', true);
-  }
-}
-
-function renderControls() {
-  root.innerHTML = '';
-
-  ledConfig.forEach((led, index) => {
+  Object.entries(commands).forEach(([key, value]) => {
+    // value має формат "тип, стан, pin"
+    const parts = value.split(',').map(p => p.trim());
+    if (parts.length !== 3) return;
+    
+    const [type, state, pin] = parts;
     const div = document.createElement('div');
-    div.className = 'switch';
+    div.className = 'led-item';
+    
+    // Якщо вам потрібно відображати назву з модифікацією (наприклад, LED4 замість led1),
+    // можна додати додаткову логіку перетворення імені.
+    const displayName = key.toUpperCase(); // або інша логіка, наприклад: 'LED' + (parseInt(key.replace('led', '')) + 3);
+    
+    // Створення підпису з назвою та PIN (GPIO)
+    const label = document.createElement('span');
+    label.className = 'led-label';
+    label.textContent = `${displayName} (GPIO${pin})`;
+    div.appendChild(label);
 
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.value = led.name;
-    nameInput.placeholder = 'Назва';
-    nameInput.addEventListener('input', (e) => {
-      ledConfig[index].name = e.target.value;
-    });
-
-    const pinInput = document.createElement('input');
-    pinInput.type = 'number';
-    pinInput.value = led.pin;
-    pinInput.placeholder = 'Пін';
-    pinInput.addEventListener('input', (e) => {
-      ledConfig[index].pin = parseInt(e.target.value);
-    });
-
-    div.appendChild(nameInput);
-    div.appendChild(pinInput);
-
-    if (led.type === 'onoff') {
-      const toggle = document.createElement('input');
-      toggle.type = 'checkbox';
-      toggle.checked = ledStates[led.name] === 'on';
-      toggle.addEventListener('change', (e) => {
-        updateLED(led.name, e.target.checked ? 'on' : 'off');
+    // В залежності від типу створюємо потрібний елемент
+    if (type === 'regular') {
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = state === 'on';
+      checkbox.addEventListener('change', () => {
+        updateCommand(key, checkbox.checked ? 'on' : 'off');
       });
-      div.appendChild(toggle);
-    } else if (led.type === 'pwm') {
-      const sliderLabel = document.createElement('label');
-      sliderLabel.textContent = `Яскравість: ${ledStates[led.name]}`;
-
+      div.appendChild(checkbox);
+    } else if (type === 'pwa') {
       const slider = document.createElement('input');
       slider.type = 'range';
       slider.min = 0;
       slider.max = 255;
-      slider.value = ledStates[led.name];
-      slider.addEventListener('input', (e) => {
-        sliderLabel.textContent = `Яскравість: ${e.target.value}`;
+      slider.value = Number(state) || 0;
+      const sliderLabel = document.createElement('span');
+      sliderLabel.textContent = slider.value;
+      
+      slider.addEventListener('input', () => {
+        sliderLabel.textContent = slider.value;
       });
-      slider.addEventListener('change', (e) => {
-        updateLED(led.name, Number(e.target.value));
+      slider.addEventListener('change', () => {
+        updateCommand(key, slider.value);
       });
-
       div.appendChild(sliderLabel);
       div.appendChild(slider);
     }
-
-    root.appendChild(div);
+    container.appendChild(div);
   });
 }
 
-addLedBtn.addEventListener('click', () => {
-  ledConfig.push({ name: `led${ledConfig.length + 1}`, pin: 2, type: 'onoff' });
-  ledStates[`led${ledConfig.length}`] = 'off';
-  renderControls();
-});
-
-saveConfigBtn.addEventListener('click', async () => {
-  const stateToSave = {};
-  ledConfig.forEach((led) => {
-    stateToSave[led.name] = ledStates[led.name] ?? (led.type === 'pwm' ? 0 : 'off');
-  });
-
+// Надсилання оновленої інформації на сервер, щоб зберегти зміни в commands.json
+async function updateCommand(key, newState) {
+  // Отримуємо поточні дані (можна спочатку завантажити усі дані та оновити вибраний елемент)
+  // Тут продемонстровано спрощений варіант POST-запиту на серверний ендпоінт '/update'
   try {
-    const response = await fetch('/save-config', {
+    const res = await fetch('/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(stateToSave),
+      body: JSON.stringify({ key, newState })
     });
-
-    if (response.ok) {
-      showMessage('Конфігурація збережена');
+    if (res.ok) {
+      console.log(`Оновлено ${key}: ${newState}`);
     } else {
-      showMessage('Помилка при збереженні', true);
+      console.error('Помилка при оновленні');
     }
   } catch (e) {
-    showMessage('Помилка з’єднання', true);
+    console.error('Помилка з’єднання', e);
+  }
+}
+
+// Обробка модального вікна для додавання нового елементу
+document.getElementById('add-button').addEventListener('click', () => {
+  document.getElementById('add-modal').style.display = 'flex';
+});
+
+document.getElementById('close-modal').addEventListener('click', () => {
+  document.getElementById('add-modal').style.display = 'none';
+});
+
+// Обробка форми додавання
+document.getElementById('add-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById('led-name').value.trim();
+  const type = document.getElementById('led-type').value;
+  const pin = document.getElementById('led-pin').value.trim();
+
+  // Для нового елемента встановлюємо початковий стан:
+  // для regular — 'off', для pwa — 0 (повзунок)
+  const state = type === 'regular' ? 'off' : '0';
+  // Створюємо рядок для запису в commands.json
+  const newCommandData = `${type}, ${state}, ${pin}`;
+
+  try {
+    // Надсилаємо дані на сервер для збереження (ендпоінт '/add-command' має бути реалізований на сервері)
+    const res = await fetch('/add-command', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: name, value: newCommandData })
+    });
+
+    if (res.ok) {
+      document.getElementById('add-modal').style.display = 'none';
+      // Після збереження оновлюємо відображення
+      loadCommands();
+    } else {
+      console.error('Помилка при збереженні нового елементу');
+    }
+  } catch (e) {
+    console.error('Помилка з’єднання', e);
   }
 });
 
-refreshBtn.addEventListener('click', () => {
-  location.reload(true);
-});
-
-// ☰ Бургер-меню
-burger.addEventListener('click', () => {
-  burger.classList.toggle('active');
-  sidebar.classList.toggle('hidden');
-  overlay.classList.toggle('hidden');
-});
-
-overlay.addEventListener('click', () => {
-  burger.classList.remove('active');
-  sidebar.classList.add('hidden');
-  overlay.classList.add('hidden');
-});
-
-// ✅ PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js').then((reg) => {
-    console.log('Service Worker зареєстровано:', reg);
-  });
-}
-
-fetchStates();
+// Завантаження даних після завантаження сторінки
+document.addEventListener('DOMContentLoaded', loadCommands);

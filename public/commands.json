@@ -1,6 +1,12 @@
 {
-  "led1": "off",
-  "led2": "off",
-  "led3": "off",
-  "led4": 128
+  "led1": {
+    "type": "regular",
+    "state": "off",
+    "pin": 2
+  },
+  "led2": {
+    "type": "pwa",
+    "state": "off",
+    "pin": 4
+  }
 }
