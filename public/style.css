@@ -38,6 +38,7 @@ body {
 
 /* Кнопки */
 button {
+  position: fixed;
   background: #222;
   color: #fff;
   border: none;
@@ -45,6 +46,10 @@ button {
   border-radius: 6px;
   cursor: pointer;
   transition: 0.3s ease;
+}
+
+.deletebutton {
+  background-color: rgb(141, 33, 33);
 }
 
 button:hover {
@@ -124,5 +129,122 @@ input[type="checkbox"] {
   .modal .modal-content {
     width: 90%;
     padding: 20px;
+  }
+}
+
+/* Загальний стиль для модальних вікон */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: none; /* Приховано за замовчуванням */
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Контейнер вмісту модального вікна */
+.modal .modal-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+  min-width: 320px;
+  max-width: 500px;
+}
+
+/* Сучасна типографіка для заголовків в модальних вікнах */
+.modal h3 {
+  margin-top: 0;
+  font-size: 24px;
+  color: #222;
+}
+
+/* Стилізація для рядків форми в модальному вікні */
+.modal .form-row {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal .form-row label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.modal .form-row input,
+.modal .form-row select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border 0.2s ease-in-out;
+}
+
+.modal .form-row input:focus,
+.modal .form-row select:focus {
+  border-color: #222;
+}
+
+/* Кнопки в модальних вікнах */
+.modal button {
+  background: #222;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+  margin-right: 10px;
+}
+
+.modal button:hover {
+  background: #000;
+}
+
+/* При необхідності - кнопка скасування */
+.modal .btn-cancel {
+  background: #ccc;
+  color: #222;
+}
+
+.modal .btn-cancel:hover {
+  background: #bbb;
+}
+
+/* Анімація для плавного появи модальних вікон */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Адаптивність для мобільних пристроїв */
+@media (max-width: 768px) {
+  .modal .modal-content {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .modal h3 {
+    font-size: 20px;
+  }
+
+  .modal .form-row input, 
+  .modal .form-row select {
+    font-size: 14px;
+  }
+
+  .modal button {
+    width: 100%;
+    margin: 5px 0;
   }
 }

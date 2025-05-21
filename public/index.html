@@ -28,8 +28,13 @@
             </select>
           </div>
           <div class="form-row">
-            <label for="led-pin">ESP32 ніжка (GPIO):</label>
-            <input type="number" id="led-pin" placeholder="2" required />
+             <label for="edit-pin">ESP32 ніжка (GPIO):</label>
+            <select id="edit-pin">
+              <option value="2">GPIO2</option>
+              <option value="4">GPIO4</option>
+              <option value="5">GPIO5</option>
+              <option value="16">GPIO16</option>
+            </select>
           </div>
           <button type="submit">Зберегти</button>
           <button type="button" id="close-add-modal">Скасувати</button>

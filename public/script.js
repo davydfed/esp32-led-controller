@@ -62,7 +62,7 @@ function renderCommands(commands) {
     editButton.addEventListener('click', () => openEditModal(key, config));
     div.appendChild(editButton);
 
-    const deleteButton = document.createElement('button');
+    const deleteButton = document.createElement('deletebutton');
     deleteButton.textContent = 'Видалити';
     deleteButton.addEventListener('click', () => deleteCommand(key));
     div.appendChild(deleteButton);
