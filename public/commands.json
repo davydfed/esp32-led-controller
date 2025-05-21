@@ -6,7 +6,7 @@
   },
   "led2": {
     "type": "pwa",
-    "state": "off",
+    "state": 128,
     "pin": 4
   }
 }
