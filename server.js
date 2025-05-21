@@ -24,7 +24,7 @@ app.post('/update', async (req, res) => {
     // Зчитування поточного JSON
     const data = await fs.readJson(filePath);
 
-    // Оновлення стану потрібного LED
+    // Оновлення стану заданого LED
     data[led] = state;
 
     // Запис оновленого JSON у файл
@@ -33,6 +33,32 @@ app.post('/update', async (req, res) => {
     res.sendStatus(200); // Все ок
   } catch (err) {
     console.error('Помилка при оновленні JSON:', err);
+    res.sendStatus(500); // Помилка сервера
+  }
+});
+
+// Додатковий ендпоінт для додавання нового елементу
+app.post('/add-command', async (req, res) => {
+  const { key, newData } = req.body; // newData має містити: { type, state, pin }
+
+  try {
+    // Зчитаємо поточний JSON
+    const data = await fs.readJson(filePath);
+
+    // Уникаємо перезапису існуючого елементу
+    if (data[key]) {
+      return res.status(400).json({ error: 'Команда з таким ключем вже існує' });
+    }
+
+    // Додаємо новий елемент
+    data[key] = newData;
+
+    // Записуємо оновлений JSON у файл
+    await fs.writeJson(filePath, data, { spaces: 2 });
+
+    res.sendStatus(200); // Все ок
+  } catch (err) {
+    console.error('Помилка при додаванні нового елементу:', err);
     res.sendStatus(500); // Помилка сервера
   }
 });
