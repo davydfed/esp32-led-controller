@@ -1,14 +1,20 @@
 const root = document.getElementById('root');
 const statusMessage = document.getElementById('status-message');
 const refreshBtn = document.getElementById('refresh-btn');
+const addLedBtn = document.getElementById('add-led-btn');
+const saveConfigBtn = document.getElementById('save-config-btn');
 
-let ledStates = { led1: "off", led2: "off", led3: "off", led4: 0 };
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+let ledStates = {};
+let ledConfig = [];
 
 function showMessage(message, isError = false) {
   statusMessage.textContent = message;
   statusMessage.style.backgroundColor = isError ? 'red' : '#4CAF50';
   statusMessage.style.display = 'block';
-
   clearTimeout(window._msgTimeout);
   window._msgTimeout = setTimeout(() => {
     statusMessage.style.display = 'none';
@@ -21,6 +27,11 @@ async function fetchStates() {
     if (res.ok) {
       const data = await res.json();
       ledStates = data;
+      ledConfig = Object.entries(data).map(([key, val], idx) => ({
+        name: key,
+        pin: typeof val === 'string' ? 2 + idx : 5 + idx,
+        type: typeof val === 'number' ? 'pwm' : 'onoff',
+      }));
       renderControls();
     } else {
       showMessage('Помилка завантаження стану', true);
@@ -40,16 +51,11 @@ async function updateLED(led, state) {
 
     if (response.ok) {
       ledStates[led] = state;
-      renderControls();
-      if (led === 'led4') {
-        showMessage(`Яскравість LED4 встановлено на ${state}`);
-      } else {
-        showMessage(`Світлодіод ${led.replace('led', '')} ${state === 'on' ? 'увімкнений' : 'вимкнений'}`);
-      }
+      showMessage(`Оновлено ${led}: ${state}`);
     } else {
       showMessage('Помилка при оновленні', true);
     }
-  } catch (error) {
+  } catch {
     showMessage('Помилка з’єднання', true);
   }
 }
@@ -57,61 +63,95 @@ async function updateLED(led, state) {
 function renderControls() {
   root.innerHTML = '';
 
-  // Керування трьома звичайними світлодіодами
-  ['led1', 'led2', 'led3'].forEach(led => {
+  ledConfig.forEach((led, index) => {
     const div = document.createElement('div');
     div.className = 'switch';
 
-    const label = document.createElement('label');
-    label.htmlFor = led;
-    label.textContent = led.toUpperCase();
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = led;
-    checkbox.checked = ledStates[led] === 'on';
-    checkbox.addEventListener('change', e => {
-      updateLED(led, e.target.checked ? 'on' : 'off');
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = led.name;
+    nameInput.placeholder = 'Назва';
+    nameInput.addEventListener('input', (e) => {
+      ledConfig[index].name = e.target.value;
     });
 
-    div.appendChild(label);
-    div.appendChild(checkbox);
+    const pinInput = document.createElement('input');
+    pinInput.type = 'number';
+    pinInput.value = led.pin;
+    pinInput.placeholder = 'Пін';
+    pinInput.addEventListener('input', (e) => {
+      ledConfig[index].pin = parseInt(e.target.value);
+    });
+
+    div.appendChild(nameInput);
+    div.appendChild(pinInput);
+
+    if (led.type === 'onoff') {
+      const toggle = document.createElement('input');
+      toggle.type = 'checkbox';
+      toggle.checked = ledStates[led.name] === 'on';
+      toggle.addEventListener('change', (e) => {
+        updateLED(led.name, e.target.checked ? 'on' : 'off');
+      });
+      div.appendChild(toggle);
+    } else if (led.type === 'pwm') {
+      const sliderLabel = document.createElement('label');
+      sliderLabel.textContent = `Яскравість: ${ledStates[led.name]}`;
+
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.min = 0;
+      slider.max = 255;
+      slider.value = ledStates[led.name];
+      slider.addEventListener('input', (e) => {
+        sliderLabel.textContent = `Яскравість: ${e.target.value}`;
+      });
+      slider.addEventListener('change', (e) => {
+        updateLED(led.name, Number(e.target.value));
+      });
+
+      div.appendChild(sliderLabel);
+      div.appendChild(slider);
+    }
+
     root.appendChild(div);
   });
-
-  // Керування яскравістю led4 (повзунок)
-  const sliderLabel = document.createElement('label');
-  sliderLabel.htmlFor = 'led4-slider';
-  sliderLabel.textContent = `Яскравість LED4: ${ledStates.led4}`;
-
-const slider = document.createElement('input');
-slider.type = 'range';
-slider.id = 'led4';
-slider.className = 'led-slider'; // ⬅️ Додали клас
-slider.min = 0;
-slider.max = 255;
-slider.value = ledStates.led4;
-  slider.addEventListener('input', e => {
-    sliderLabel.textContent = `Яскравість LED4: ${e.target.value}`;
-  });
-  slider.addEventListener('change', e => {
-    updateLED('led4', Number(e.target.value));
-  });
-
-  root.appendChild(sliderLabel);
-  root.appendChild(slider);
 }
+
+addLedBtn.addEventListener('click', () => {
+  ledConfig.push({ name: `led${ledConfig.length + 1}`, pin: 2, type: 'onoff' });
+  ledStates[`led${ledConfig.length}`] = 'off';
+  renderControls();
+});
+
+saveConfigBtn.addEventListener('click', async () => {
+  const stateToSave = {};
+  ledConfig.forEach((led) => {
+    stateToSave[led.name] = ledStates[led.name] ?? (led.type === 'pwm' ? 0 : 'off');
+  });
+
+  try {
+    const response = await fetch('/save-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(stateToSave),
+    });
+
+    if (response.ok) {
+      showMessage('Конфігурація збережена');
+    } else {
+      showMessage('Помилка при збереженні', true);
+    }
+  } catch (e) {
+    showMessage('Помилка з’єднання', true);
+  }
+});
 
 refreshBtn.addEventListener('click', () => {
   location.reload(true);
 });
 
-fetchStates();
-
-const burger = document.getElementById('burger');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-
+// ☰ Бургер-меню
 burger.addEventListener('click', () => {
   burger.classList.toggle('active');
   sidebar.classList.toggle('hidden');
@@ -124,8 +164,11 @@ overlay.addEventListener('click', () => {
   overlay.classList.add('hidden');
 });
 
+// ✅ PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js').then((reg) => {
-    console.log('Service Worker registered:', reg);
+    console.log('Service Worker зареєстровано:', reg);
   });
 }
+
+fetchStates();

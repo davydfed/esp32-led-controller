@@ -8,12 +8,17 @@
   <link rel="manifest" href="/manifest.json">
 </head>
 <body>
+  <!-- Затемнення -->
   <div class="overlay hidden" id="overlay"></div>
+
+  <!-- Бургер-меню -->
   <div class="burger" id="burger">
     <span></span>
     <span></span>
     <span></span>
   </div>
+
+  <!-- Бокове меню -->
   <nav class="sidebar hidden" id="sidebar">
     <ul>
       <li><a href="#">Головна</a></li>
@@ -21,13 +26,23 @@
     </ul>
   </nav>
 
-
+  <!-- Повідомлення та кнопка оновлення -->
   <button id="refresh-btn" class="mobile-only">Оновити</button>
   <div id="status-message"></div>
 
+  <!-- Основна секція -->
+  <h1>Керування LED</h1>
+  <div id="root"></div>
 
+  <!-- Кнопки керування конфігурацією -->
+  <div class="add-led-section">
+    <button id="add-led-btn">Додати світлодіод</button>
+    <button id="save-config-btn">Зберегти конфігурацію</button>
+  </div>
 
-  <!-- <section id="faq" class="faq-section">
+  <!-- FAQ (опціонально: можеш розкоментувати, якщо хочеш) -->
+  <!--
+  <section id="faq" class="faq-section">
     <h2>FAQ</h2>
     <div class="faq-item">
       <button class="faq-question">Як працює цей додаток?</button>
@@ -37,16 +52,10 @@
       <button class="faq-question">Як часто оновлюється стан?</button>
       <div class="faq-answer">Стан оновлюється при кожній зміні або натисканні кнопки «Оновити».</div>
     </div>
-  </section> -->
+  </section>
+  -->
 
-   <h1>Керування LED</h1>
-  <div id="root"></div>
-  <div class="add-led-section">
-    <button id="add-led-btn">Додати світлодіод</button>
-    <button id="save-json-btn">Зберегти конфігурацію</button>
-  </div>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>
